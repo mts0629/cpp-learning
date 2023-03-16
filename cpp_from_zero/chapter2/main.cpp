@@ -17,8 +17,7 @@ int main() {
     {
         // Constant in runtime
         const int x = 5;
-        // Compilation error
-        // x = 10;
+        // x = 10; // Compilation error
 
         // Constant in compilation time
         constexpr int cex = 5 * 10;
@@ -68,12 +67,11 @@ int main() {
         Day day = Fri;
         // Can be used as integer
         int iday = Fri;
-        // Compilation error
-        // Day day = 5;
+        // Day day = 5; // Compilation error
 
-        // Compilation error: redeclaration of "Sun"
+        // Compilation error
         // enum SolarSystem {
-        //     Sun,
+        //     Sun, // Redeclaration of "Sun"
         //     Marcury,
         //     Venus,
         //     Earth,
@@ -97,11 +95,8 @@ int main() {
             Sat
         };
         Day day = Day::Fri;
-        // Compilation error
-        // Day day = Fri;
-        // Compilation error
-        // iday = Day::Fri;
-        // Cast is valid
+        // Day day = Fri; // Compilation error
+        // iday = Day::Fri; // Compilation error
         int iday = static_cast<int>(Day::Fri);
 
         enum class SolarSystem {
@@ -130,6 +125,40 @@ int main() {
         float f = 3.141592f; // float
     }
 
+    {
+        int x = 5;
+        // Pointer to int
+        int* p = &x;
+        std::cout << "p = " << p << std::endl;
+        // Dereference
+        std::cout << "*p = " << *p << std::endl;
+        // Null pointer
+        p = nullptr;
+
+        // Pointer to const int
+        const int* pc = &x;
+        // *pc = 123; // Compilation error
+        int y = 6;
+        pc = &y; // OK
+
+        // Const pointer to int
+        int* const cp = &x;
+        // cp = &y; // Compilation error
+        *cp = 6; // OK
+
+        // Const pointer to const int
+        const int* const cpc = &x;
+        // Compilation error
+        // cpc = &y;
+        // *cpc = 6;
+
+        // Reference
+        int& r = x; // Initializer is mandatory
+        // Can be used in a similar way with a normal variable
+        std::cout << "r = " << r << std::endl;
+        r = 100;
+        std::cout << "r = " << r << std::endl;
+    }
 
     return 0;
 }
