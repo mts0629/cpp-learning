@@ -1,6 +1,9 @@
 #include <iostream>
 #include <cstddef>
-#include <array>
+#include <array> // std::array
+#include <string> // std::string
+#include <tuple> // std::tuple
+#include <utility> // std::pair
 
 // Function template: get the number of elements of an array
 template <class T, std::size_t N>
@@ -68,6 +71,59 @@ int main() {
         // int arr1_2[3] = arr1_1; // Compilation error
         std::array<int, 3> arr2_1;
         std::array<int, 3> arr2_2 = arr2_1; // Copy
+    }
+
+    {
+        // String
+        std::string s = "Hello";
+        for (auto i = 0; i < s.size(); i++) {
+            std::cout << s[i];
+        }
+        std::cout << std::endl;
+    }
+
+    {
+        // Tuple
+        std::tuple<std::string, int> person { "Bob", 20 };
+
+        // No limitation for the number of elements
+        std::tuple<std::string, int, std::string> person2 { "Bob", 20, "USA" };
+
+        // Refer an element
+        std::get<0>(person); // "Bob"
+        std::get<1>(person); // 20
+
+        // Initialization
+        std::tuple<std::string, int> person3 { "Bob", 20 };
+        std::tuple<std::string, int> person4("Bob", 20);
+        std::tuple<std::string, int> person5 = std::make_tuple("Bob", 20);
+
+        // Assign elements to variables with std::tie()
+        std::string name;
+        int age;
+        std::string country;
+        std::tie(name, age, country) = person2; // name = "Bob", age = 20, country = "USA"
+    }
+
+    {
+        // Pair
+        std::pair<std::string, int> person { "Bob", 20 };
+
+        // Refer an element
+        std::get<0>(person); // "Bob"
+        std::get<1>(person); // 20
+        person.first;  // "Bob"
+        person.second; // 20
+
+        // Initialization
+        std::pair<std::string, int> person2 { "Bob", 20 };
+        std::pair<std::string, int> person3("Bob", 20);
+        std::pair<std::string, int> person4 = std::make_pair("Bob", 20);
+
+        // Assignment with std::tie()
+        std::string name;
+        int age;
+        std::tie(name, age) = person; // name = "Bob", age = 20
     }
 
     return 0;
