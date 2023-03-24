@@ -1,5 +1,6 @@
 #include <iostream>
 #include "a.hpp"
+#include "defs.hpp"
 
 // Prototype declaration
 void HelloWorld();
@@ -32,6 +33,10 @@ namespace B {
         }
     }
 } // namespace B
+
+namespace {
+    int x_in_u = 5;
+} // namespace
 
 int main() {
     {
@@ -71,6 +76,21 @@ int main() {
         std::cout << gx << std::endl; // 10
         // Refer global scope with scope resolution operator
         std::cout << ::gx << std::endl; // 100
+    }
+
+    {
+        // Link error: decleared in a.cpp, cannot refer here
+        // std::cout << x_in_a << std::endl;
+
+        // Decleared in the unnamed namespace in main.cpp / a.cpp
+        // A definition does not be duplicated
+        std::cout << x_in_u << std::endl;
+    }
+
+    {
+        // Call inline function defined in defs.hpp
+        // The definition is expected to be expanded at call site
+        ProcInline();
     }
 
     return 0;
