@@ -1,5 +1,5 @@
-#ifndef DEFS_HPP
-#define DEFS_HPP
+#ifndef DEF_HPP
+#define DEF_HPP
 
 #include <iostream>
 
@@ -9,4 +9,4 @@ inline void ProcInline() {
     std::cout << "ProcInline" << std::endl;
 }
 
-#endif // DEFS_HPP
+#endif // DEF_HPP

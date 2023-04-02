@@ -2,14 +2,6 @@
 
 #include <iostream>
 
-// Internal linkage in a.cpp
-static int x_in_a = 246;
-
-// Unnamed namespace: internal linkage
-namespace {
-    int x_in_u = 50;
-} // namespace
-
 // Definitions
 void DoSomething() {
     std::cout << "DoSomething" << std::endl;
