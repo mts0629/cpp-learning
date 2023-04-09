@@ -5,7 +5,7 @@
 
 int main() {
     // Input file stream
-    std::ifstream ifile("./file.txt");
+    std::ifstream ifile("./chapter5/file.txt");
 
     // Read text file per line
     std::string line;
