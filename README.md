@@ -1,14 +1,16 @@
 # cpp-study
 
+C++の学習
+
 ## 環境
 
 - OS： Ubuntu 20.04 LTS
-- コンパイラ： g++ 7.5.0
-- デバッガ： GNU gdb 8.1.1
-- ビルドツール
+- g++ 7.5.0
+- ツール
+    - gdb 8.1.1
     - GNU Make 4.1
     - CMake v3.24.1
-- ユニットテストフレームワーク： google test v1.8.1
+    - google test v1.8.1
 
 ## 参考
 
