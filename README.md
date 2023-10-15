@@ -1,4 +1,4 @@
-# cpp-study
+# study-cpp
 
 C++の学習
 
