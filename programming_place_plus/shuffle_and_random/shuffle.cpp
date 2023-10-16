@@ -1,6 +1,6 @@
-#include <algorithm> // std:shuffle
+#include <algorithm>
 #include <iostream>
-#include <random> // std::random_device, std::mt19937
+#include <random>
 #include <vector>
 
 int main() {
