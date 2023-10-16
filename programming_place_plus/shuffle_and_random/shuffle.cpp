@@ -23,7 +23,7 @@ int main() {
     auto min = std::mt19937::min();
     auto max = std::mt19937::max();
     std::cout << "mt19937: [" << min << ", " << max << "]" << std::endl;
-    for (auto i = 0; i < 10; i++) {
+    for (auto i = 0; i < 10; ++i) {
         std::cout << rand_engine() << std::endl;
     }
 

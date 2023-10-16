@@ -22,7 +22,7 @@ int Fibonacchi() {
 
     a[0] = 0;
     a[1] = 1;
-    for (auto i = 2; i <= N; i++) {
+    for (auto i = 2; i <= N; ++i) {
         a[i] = a[i - 1] + a[i - 2];
     }
 
