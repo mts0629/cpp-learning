@@ -4,6 +4,7 @@ Study of C++
 
 - `cpp_from_zero/` ... From [ゼロから学ぶ C++](https://rinatz.github.io/cpp-book/)
 - `programming_place_plus/` ... From [Programming Place Plus 新C++編](https://programming-place.net/ppp/contents/cpp2/index.html)
+- `playground/` ... Small codes and projects for study
 
 ## Tools and dependencies
 
@@ -17,6 +18,7 @@ Study of C++
 
 - `cpp_from_zero/` ... MIT License
     - GoogleTest ... BSD 3-Clause License
+- `playground/` ... Unlicense
 
 Source codes in following directories are based on the contents in each reference  and following changes are included:
 
