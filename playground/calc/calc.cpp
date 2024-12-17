@@ -1,36 +1,80 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <stack>
+
+static const std::string operators = "+-*/";
+static const std::string separators = " \t" + operators;
 
 static std::string parseExpression(const std::string& user_input) {
-    std::istringstream iss {user_input};
+    std::ostringstream buf {};
+    std::stack<char> ops {};
+    std::stack<double> values {};
 
-    double operand1, operand2;
-    std::string op;
-    iss >> operand1 >> op >> operand2;
+    for (size_t i = 0; i < user_input.size(); ++i) {
+        auto c = user_input[i];
 
-    if (op.size() > 1) {
-        return "Parser failed\n"
-               "Format: OP1 ['+'|'-'|'*'|'/'] OP2";
+        if (separators.find_first_of(c) != std::string::npos) {
+            try {
+                auto value = stod(buf.str());
+                values.push(value);
+            } catch (const std::invalid_argument e) {
+                std::cout << "Parser failed" << std::endl;
+                return "";
+            } catch (const std::out_of_range e) {
+                std::cout << "Value is out of range" << std::endl;
+                return "";
+            }
+
+            ops.push(c);
+            buf.clear();
+
+            continue;
+        }
+
+        buf << c;
+
+        if (i == (user_input.size() - 1)) {
+            try {
+                auto value = stod(buf.str());
+                values.push(value);
+            } catch (const std::invalid_argument e) {
+                std::cout << "Parser failed" << std::endl;
+                return "";
+            } catch (const std::out_of_range e) {
+                std::cout << "Value is out of range" << std::endl;
+                return "";
+            }
+        }
     }
 
     double result = 0.0;
-    switch (op[0]) {
-        case '+':
-            result = operand1 + operand2;
-            break;
-        case '-':
-            result = operand1 - operand2;
-            break;
-        case '*':
-            result = operand1 * operand2;
-            break;
-        case '/':
-            result = operand1 / operand2;
-            break;
-        default:
-            return "Invalid operator";
-            break;
+
+    while (!ops.empty()) {
+        auto op = ops.top();
+        ops.pop();
+        auto rv = values.top();
+        values.pop();
+        auto lv = values.top();
+        values.pop();
+
+        switch (op) {
+            case '+':
+                result += lv + rv;
+                break;
+            case '-':
+                result += lv - rv;
+                break;
+            case '*':
+                result += lv * rv;
+                break;
+            case '/':
+                result += lv / rv;
+                break;
+            default:
+                return "Invalid operator";
+                break;
+        }
     }
 
     return std::to_string(result);
