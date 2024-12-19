@@ -14,7 +14,51 @@ static bool isOperator(const char c) {
     return operators.find_first_of(c) != std::string::npos;
 }
 
-static bool parseValue(double& value, const std::string& token) {
+static bool isStreamEmpty(std::ostringstream& buf) {
+    return buf.tellp() == std::streampos(0);
+}
+
+static void flushCurrentToken(
+    std::vector<std::string>& tokens, std::ostringstream& buf
+) {
+    tokens.push_back(buf.str());
+    buf.str("");
+}
+
+static std::vector<std::string> tokenize(const std::string& str) {
+    std::ostringstream buf {};
+    std::vector<std::string> tokens {};
+
+    for (auto it = str.begin(); it != str.end(); ++it) {
+        auto c = *it;
+
+        if (isSeparator(c)) {
+            if (!isStreamEmpty(buf)) {
+                flushCurrentToken(tokens, buf);
+            }
+            if (!isspace(c)) {
+                buf << c;
+            }
+            if (!isStreamEmpty(buf)) {
+                flushCurrentToken(tokens, buf);
+            }
+
+            continue;
+        }
+
+        buf << c;
+
+        if (it == (str.end() - 1)) {
+            if (!isStreamEmpty(buf)) {
+                flushCurrentToken(tokens, buf);
+            }
+        }
+    }
+
+    return tokens;
+}
+
+static bool parseNumber(double& value, const std::string& token) {
     try {
         auto v = stod(token);
         value = v;
@@ -29,37 +73,21 @@ static bool parseValue(double& value, const std::string& token) {
     return true;
 }
 
-static void parseExpression(const std::string& user_input) {
-    std::ostringstream buf {};
+static void parseExpression(const std::vector<std::string>& tokens) {
     std::queue<char> ops {};
     std::queue<double> values {};
 
-    for (auto it = user_input.begin(); it != user_input.end(); ++it) {
-        auto c = *it;
-
-        if (isSeparator(c) || (it == (user_input.end() - 1))) {
-            if (!isSeparator(c)) {
-                buf << c;
-            } else if (isOperator(c)) {
-                ops.push(c);
-            }
-
-            auto token = buf.str();
-            if (token.size() == 0) {
-                continue;
-            }
-
-            double value;
-            if (parseValue(value, token)) {
-                values.push(value);
-                buf.str("");
-                continue;
-            }
-
-            return;
+    for (auto token : tokens) {
+        if (isOperator(token[0])) {
+            ops.push(token[0]);
+            continue;
         }
 
-        buf << c;
+        double number;
+        if (parseNumber(number, token)) {
+            values.push(number);
+            continue;
+        }
     }
 
     if ((ops.size() != 1) || (values.size() != 2)) {
@@ -109,7 +137,8 @@ int main() {
             break;
         }
 
-        parseExpression(user_input);
+        auto tokens = tokenize(user_input);
+        parseExpression(tokens);
     }
 
     return 0;
