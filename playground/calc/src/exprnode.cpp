@@ -1,11 +1,50 @@
+#include "exprnode.hpp"
+
 #include <iostream>
-#include <memory>
 #include <sstream>
-#include <string>
-#include <vector>
+#include <stdexcept>
+
+namespace {
 
 static const std::string operators = "+-*/";
 static const std::string separators = " \t" + operators;
+
+}
+
+namespace Calc {
+
+double ExprNode::eval() {
+    if (this->type_ == ExprNodeType::NUMBER) {
+        return this->value_;
+    }
+
+    if ((this->lhs_ == nullptr) || (this->rhs_ == nullptr)) {
+        throw std::runtime_error("Operands are lacking");
+    }
+
+    auto lhs = this->lhs_->eval();
+    auto rhs = this->rhs_->eval();
+
+    switch (this->type_) {
+        case ExprNodeType::ADD:
+            this->value_ = lhs + rhs;
+            break;
+        case ExprNodeType::SUB:
+            this->value_ = lhs - rhs;
+            break;
+        case ExprNodeType::MUL:
+            this->value_ = lhs * rhs;
+            break;
+        case ExprNodeType::DIV:
+            this->value_ = lhs / rhs;
+            break;
+        default:
+            throw std::runtime_error("Invalid operator");
+            break;
+    }
+
+    return this->value_;
+}
 
 static bool isSeparator(const char c) {
     return separators.find_first_of(c) != std::string::npos;
@@ -26,7 +65,7 @@ static void flushCurrentToken(
     buf.str("");
 }
 
-static std::vector<std::string> tokenize(const std::string& str) {
+std::vector<std::string> tokenize(const std::string& str) {
     std::ostringstream buf {};
     std::vector<std::string> tokens {};
 
@@ -59,89 +98,6 @@ static std::vector<std::string> tokenize(const std::string& str) {
     return tokens;
 }
 
-enum class ExprNodeType {
-    INVALID,
-    NUMBER,
-    ADD,
-    SUB,
-    MUL,
-    DIV
-};
-
-class ExprNode {
-public:
-    ExprNode(const double value) :
-        type_(ExprNodeType::NUMBER), value_(value), lhs_(nullptr), rhs_(nullptr) {}
-
-    ExprNode(const ExprNodeType op) :
-        type_(op), value_(0), lhs_(nullptr), rhs_(nullptr) {}
-
-    double eval() {
-        if (this->type_ == ExprNodeType::NUMBER) {
-            return this->value_;
-        }
-
-        if ((this->lhs_ == nullptr) || (this->rhs_ == nullptr)) {
-            throw std::runtime_error("Operands are lacking");
-        }
-
-        auto lhs = this->lhs_->eval();
-        auto rhs = this->rhs_->eval();
-
-        switch (this->type_) {
-            case ExprNodeType::ADD:
-                this->value_ = lhs + rhs;
-                break;
-            case ExprNodeType::SUB:
-                this->value_ = lhs - rhs;
-                break;
-            case ExprNodeType::MUL:
-                this->value_ = lhs * rhs;
-                break;
-            case ExprNodeType::DIV:
-                this->value_ = lhs / rhs;
-                break;
-            default:
-                throw std::runtime_error("Invalid operator");
-                break;
-        }
-
-        return this->value_;
-    }
-
-    bool isNumber() {
-        return this->type_ == ExprNodeType::NUMBER;
-    }
-
-    bool isOperator() {
-        return !isNumber();
-    }
-
-    bool isLhsBlank() {
-        return this->lhs_ == nullptr;
-    }
-
-    bool isRhsBlank() {
-        return this->rhs_ == nullptr;
-    }
-
-    void addLhs(std::unique_ptr<ExprNode>& node) {
-        this->lhs_.reset();
-        this->lhs_ = std::move(node);
-    }
-
-    void addRhs(std::unique_ptr<ExprNode>& node) {
-        this->rhs_.reset();
-        this->rhs_ = std::move(node);
-    }
-
-private:
-    ExprNodeType type_;
-    double value_;
-    std::unique_ptr<ExprNode> lhs_;
-    std::unique_ptr<ExprNode> rhs_;
-};
-
 static double parseNumber(const std::string& token) {
     try {
         return stod(token);
@@ -154,7 +110,7 @@ static double parseNumber(const std::string& token) {
     }
 }
 
-static std::unique_ptr<ExprNode> parseToExpression(const std::vector<std::string>& tokens) {
+std::unique_ptr<ExprNode> parseToExpression(const std::vector<std::string>& tokens) {
     std::unique_ptr<ExprNode> root {nullptr};
 
     for (auto token : tokens) {
@@ -211,24 +167,4 @@ static std::unique_ptr<ExprNode> parseToExpression(const std::vector<std::string
     return root;
 }
 
-int main() {
-    while (true) {
-        std::cout << "> ";
-        std::string user_input {};
-        std::getline(std::cin, user_input);
-
-        if (user_input == "q") {
-            break;
-        }
-
-        try {
-            auto tokens = tokenize(user_input);
-            auto expr = parseToExpression(tokens);
-            std::cout << expr->eval() << std::endl;
-        } catch (const std::exception& e) {
-            (void)e;
-        }
-    }
-
-    return 0;
-}
+} // namespace Calc
