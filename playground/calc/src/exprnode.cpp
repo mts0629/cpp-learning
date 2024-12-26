@@ -9,7 +9,7 @@ namespace {
 static const std::string operators = "+-*/";
 static const std::string separators = " \t" + operators;
 
-}
+}  // namespace
 
 namespace Calc {
 
@@ -58,16 +58,15 @@ static bool isStreamEmpty(std::ostringstream& buf) {
     return buf.tellp() == std::streampos(0);
 }
 
-static void flushCurrentToken(
-    std::vector<std::string>& tokens, std::ostringstream& buf
-) {
+static void flushCurrentToken(std::vector<std::string>& tokens,
+                              std::ostringstream& buf) {
     tokens.push_back(buf.str());
     buf.str("");
 }
 
 std::vector<std::string> tokenize(const std::string& str) {
-    std::ostringstream buf {};
-    std::vector<std::string> tokens {};
+    std::ostringstream buf{};
+    std::vector<std::string> tokens{};
 
     for (auto it = str.begin(); it != str.end(); ++it) {
         auto c = *it;
@@ -110,11 +109,12 @@ static double parseNumber(const std::string& token) {
     }
 }
 
-std::unique_ptr<ExprNode> parseToExpression(const std::vector<std::string>& tokens) {
-    std::unique_ptr<ExprNode> root {nullptr};
+std::unique_ptr<ExprNode> parseToExpression(
+    const std::vector<std::string>& tokens) {
+    std::unique_ptr<ExprNode> root{nullptr};
 
     for (auto token : tokens) {
-        std::unique_ptr<ExprNode> node {nullptr};
+        std::unique_ptr<ExprNode> node{nullptr};
 
         if (isOperator(token[0])) {
             ExprNodeType optype = ExprNodeType::INVALID;
@@ -156,10 +156,8 @@ std::unique_ptr<ExprNode> parseToExpression(const std::vector<std::string>& toke
             } else if (root->isRhsBlank()) {
                 root->addRhs(node);
             } else {
-                throw std::runtime_error(
-                    "No corresponding operators to " + \
-                    std::to_string(node->eval())
-                );
+                throw std::runtime_error("No corresponding operators to " +
+                                         std::to_string(node->eval()));
             }
         }
     }
@@ -167,4 +165,4 @@ std::unique_ptr<ExprNode> parseToExpression(const std::vector<std::string>& toke
     return root;
 }
 
-} // namespace Calc
+}  // namespace Calc

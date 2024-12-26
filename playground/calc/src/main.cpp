@@ -5,7 +5,7 @@
 int main() {
     while (true) {
         std::cout << "> ";
-        std::string user_input {};
+        std::string user_input{};
         std::getline(std::cin, user_input);
 
         if (user_input == "q") {

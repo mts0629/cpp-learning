@@ -7,40 +7,28 @@
 
 namespace Calc {
 
-enum class ExprNodeType {
-    INVALID,
-    NUMBER,
-    ADD,
-    SUB,
-    MUL,
-    DIV
-};
+enum class ExprNodeType { INVALID, NUMBER, ADD, SUB, MUL, DIV };
 
 class ExprNode {
-public:
-    ExprNode(const double value) :
-        type_(ExprNodeType::NUMBER), value_(value), lhs_(nullptr), rhs_(nullptr) {}
+   public:
+    ExprNode(const double value)
+        : type_(ExprNodeType::NUMBER),
+          value_(value),
+          lhs_(nullptr),
+          rhs_(nullptr) {}
 
-    ExprNode(const ExprNodeType op) :
-        type_(op), value_(0), lhs_(nullptr), rhs_(nullptr) {}
+    ExprNode(const ExprNodeType op)
+        : type_(op), value_(0), lhs_(nullptr), rhs_(nullptr) {}
 
     double eval();
 
-    bool isNumber() {
-        return this->type_ == ExprNodeType::NUMBER;
-    }
+    bool isNumber() { return this->type_ == ExprNodeType::NUMBER; }
 
-    bool isOperator() {
-        return !isNumber();
-    }
+    bool isOperator() { return !isNumber(); }
 
-    bool isLhsBlank() {
-        return this->lhs_ == nullptr;
-    }
+    bool isLhsBlank() { return this->lhs_ == nullptr; }
 
-    bool isRhsBlank() {
-        return this->rhs_ == nullptr;
-    }
+    bool isRhsBlank() { return this->rhs_ == nullptr; }
 
     void addLhs(std::unique_ptr<ExprNode>& node) {
         this->lhs_.reset();
@@ -52,7 +40,7 @@ public:
         this->rhs_ = std::move(node);
     }
 
-private:
+   private:
     ExprNodeType type_;
     double value_;
     std::unique_ptr<ExprNode> lhs_;
@@ -61,8 +49,9 @@ private:
 
 std::vector<std::string> tokenize(const std::string& str);
 
-std::unique_ptr<ExprNode> parseToExpression(const std::vector<std::string>& tokens);
+std::unique_ptr<ExprNode> parseToExpression(
+    const std::vector<std::string>& tokens);
 
-} // namespace Calc
+}  // namespace Calc
 
-#endif // EXPRNODE_HPP
+#endif  // EXPRNODE_HPP
