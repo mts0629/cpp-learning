@@ -20,22 +20,22 @@ public:
     ExprNode(const ExprNodeType op)
         : type_(op), value_(0), lhs_(nullptr), rhs_(nullptr) {}
 
+    const std::unique_ptr<ExprNode>& left() { return this->lhs_; }
+
+    const std::unique_ptr<ExprNode>& right() { return this->rhs_; }
+
     double eval();
 
     bool isNumber() { return this->type_ == ExprNodeType::NUMBER; }
 
     bool isOperator() { return !isNumber(); }
 
-    bool isLhsBlank() { return this->lhs_ == nullptr; }
-
-    bool isRhsBlank() { return this->rhs_ == nullptr; }
-
-    void addLhs(std::unique_ptr<ExprNode>& node) {
+    void appendLeft(std::unique_ptr<ExprNode>& node) {
         this->lhs_.reset();
         this->lhs_ = std::move(node);
     }
 
-    void addRhs(std::unique_ptr<ExprNode>& node) {
+    void appendRight(std::unique_ptr<ExprNode>& node) {
         this->rhs_.reset();
         this->rhs_ = std::move(node);
     }

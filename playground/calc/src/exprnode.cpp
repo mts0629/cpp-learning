@@ -97,9 +97,11 @@ std::vector<std::string> tokenize(const std::string& str) {
     return tokens;
 }
 
-static double parseNumber(const std::string& token) {
+static std::unique_ptr<ExprNode> createNumberNode(const std::string& token) {
+    double number = 0;
+
     try {
-        return stod(token);
+        number = stod(token);
     } catch (const std::invalid_argument& e) {
         std::cout << "Invalid token: \"" << token << "\"" << std::endl;
         throw e;
@@ -107,6 +109,40 @@ static double parseNumber(const std::string& token) {
         std::cout << "Value \"" << token << "\" is out of range" << std::endl;
         throw e;
     }
+
+    return std::make_unique<ExprNode>(number);
+}
+
+static std::unique_ptr<ExprNode> createOperatorNode(std::string& token) {
+    ExprNodeType optype = ExprNodeType::INVALID;
+
+    switch (token[0]) {
+        case '+':
+            optype = ExprNodeType::ADD;
+            break;
+        case '-':
+            optype = ExprNodeType::SUB;
+            break;
+        case '*':
+            optype = ExprNodeType::MUL;
+            break;
+        case '/':
+            optype = ExprNodeType::DIV;
+            break;
+        default:
+            throw std::runtime_error("Invalid operator: " + token);
+            break;
+    }
+
+    return std::make_unique<ExprNode>(optype);
+}
+
+static std::unique_ptr<ExprNode> createNode(std::string& token) {
+    if (isOperator(token[0])) {
+        return createOperatorNode(token);
+    }
+
+    return createNumberNode(token);
 }
 
 std::unique_ptr<ExprNode> parseToExpression(
@@ -114,32 +150,7 @@ std::unique_ptr<ExprNode> parseToExpression(
     std::unique_ptr<ExprNode> root{nullptr};
 
     for (auto token : tokens) {
-        std::unique_ptr<ExprNode> node{nullptr};
-
-        if (isOperator(token[0])) {
-            ExprNodeType optype = ExprNodeType::INVALID;
-            switch (token[0]) {
-                case '+':
-                    optype = ExprNodeType::ADD;
-                    break;
-                case '-':
-                    optype = ExprNodeType::SUB;
-                    break;
-                case '*':
-                    optype = ExprNodeType::MUL;
-                    break;
-                case '/':
-                    optype = ExprNodeType::DIV;
-                    break;
-                default:
-                    throw std::runtime_error("Invalid operator: " + token);
-                    break;
-            }
-            node = std::make_unique<ExprNode>(optype);
-        } else {
-            double number = parseNumber(token);
-            node = std::make_unique<ExprNode>(number);
-        }
+        auto node = createNode(token);
 
         if (root == nullptr) {
             root = std::move(node);
@@ -147,14 +158,15 @@ std::unique_ptr<ExprNode> parseToExpression(
         }
 
         if (node->isOperator()) {
-            node->addLhs(root);
+            auto tmp = std::move(root);
+            node->appendLeft(tmp);
             root.reset();
             root = std::move(node);
         } else {
-            if (root->isLhsBlank()) {
-                root->addLhs(node);
-            } else if (root->isRhsBlank()) {
-                root->addRhs(node);
+            if (root->left() == nullptr) {
+                root->appendLeft(node);
+            } else if (root->right() == nullptr) {
+                root->appendRight(node);
             } else {
                 throw std::runtime_error("No corresponding operators to " +
                                          std::to_string(node->eval()));
