@@ -10,7 +10,7 @@ namespace Calc {
 enum class ExprNodeType { INVALID, NUMBER, ADD, SUB, MUL, DIV };
 
 class ExprNode {
-   public:
+public:
     ExprNode(const double value)
         : type_(ExprNodeType::NUMBER),
           value_(value),
@@ -40,7 +40,7 @@ class ExprNode {
         this->rhs_ = std::move(node);
     }
 
-   private:
+private:
     ExprNodeType type_;
     double value_;
     std::unique_ptr<ExprNode> lhs_;

@@ -13,6 +13,7 @@ Study of C++
 - GNU Make
 - CMake
 - [GoogleTest](https://github.com/google/googletest/tree/main) v1.8.1
+- clang-format
 
 ## License
 
