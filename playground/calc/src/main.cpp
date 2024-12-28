@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "exprnode.hpp"
+#include "expression.hpp"
 
 int main() {
     while (true) {
@@ -13,9 +13,8 @@ int main() {
         }
 
         try {
-            auto tokens = Calc::tokenize(user_input);
-            auto expr = Calc::parseToExpression(tokens);
-            std::cout << expr->eval() << std::endl;
+            auto expr = Calc::createExpression(user_input);
+            std::cout << expr.eval() << std::endl;
         } catch (const std::exception& e) {
             (void)e;
         }
