@@ -35,10 +35,8 @@ std::vector<std::string> Tokenizer::tokenize(std::string str) {
             if (!isStreamEmpty(buf)) {
                 flushCurrentToken(tokens, buf);
             }
-            if (!isspace(c)) {
+            if ((c == '+') || (c == '-') || (c == '*') || (c == '/')) {
                 buf << c;
-            }
-            if (!isStreamEmpty(buf)) {
                 flushCurrentToken(tokens, buf);
             }
 
