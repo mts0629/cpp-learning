@@ -42,5 +42,24 @@ target_include_directories(
 )
 target_link_libraries(test_tokenizer GTest::gtest_main)
 
+add_executable(
+    test_node test/test_node.cpp src/node.cpp
+)
+target_include_directories(
+    test_node PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+target_link_libraries(test_node GTest::gtest_main)
+
+add_executable(
+    test_expression test/test_expression.cpp
+    src/expression.cpp src/node.cpp src/tokenizer.cpp
+)
+target_include_directories(
+    test_expression PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+target_link_libraries(test_expression GTest::gtest_main)
+
 include(GoogleTest)
 gtest_discover_tests(test_tokenizer)
+gtest_discover_tests(test_node)
+gtest_discover_tests(test_expression)
