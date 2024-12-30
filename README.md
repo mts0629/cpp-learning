@@ -17,9 +17,12 @@ Study of C++
 
 ## License
 
+Following licenses are applied for each project.
+
 - `cpp_from_zero/` ... MIT License
-    - GoogleTest ... BSD 3-Clause License
 - `playground/` ... Unlicense
+
+Both project uses GoogleTest. It is provided by BSD 3-Clause License.
 
 Source codes in following directories are based on the contents in each reference  and following changes are included:
 
