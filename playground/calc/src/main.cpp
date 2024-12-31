@@ -1,8 +1,14 @@
 #include <iostream>
 
-#include "expression.hpp"
+#include "parser.hpp"
+#include "tokenizer.hpp"
 
 int main() {
+    std::vector<char> separators = {'+', '-', '*', '/', ' ', '\t'};
+
+    auto tokenizer = Calc::Tokenizer(separators);
+    auto parser = Calc::Parser();
+
     while (true) {
         std::cout << "> ";
         std::string user_input{};
@@ -13,8 +19,9 @@ int main() {
         }
 
         try {
-            auto expr = Calc::createExpression(user_input);
-            std::cout << expr.eval() << std::endl;
+            auto tokens = tokenizer.tokenize(user_input);
+            auto expr = parser.parse(tokens);
+            std::cout << expr->eval() << std::endl;
         } catch (const std::exception& e) {
             (void)e;
         }

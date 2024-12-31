@@ -1,15 +1,12 @@
-#include "expression.hpp"
+#include "parser.hpp"
 
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
 
-#include "tokenizer.hpp"
-
 namespace {
 
 static std::vector<char> operators = {'+', '-', '*', '/'};
-static std::vector<char> separators = {'+', '-', '*', '/', ' ', '\t'};
 
 }  // namespace
 
@@ -73,7 +70,7 @@ static std::unique_ptr<Node> createNode(std::string& token) {
     return createNumberNode(token);
 }
 
-static Expression parseToExpression(const std::vector<std::string>& tokens) {
+std::unique_ptr<Node> Parser::parse(const std::vector<std::string>& tokens) {
     std::unique_ptr<Node> root{nullptr};
 
     for (auto token : tokens) {
@@ -101,13 +98,7 @@ static Expression parseToExpression(const std::vector<std::string>& tokens) {
         }
     }
 
-    return Expression(root);
-}
-
-Expression createExpression(std::string& str) {
-    auto tokenizer = Calc::Tokenizer(separators);
-    auto tokens = tokenizer.tokenize(str);
-    return parseToExpression(tokens);
+    return root;
 }
 
 }  // namespace Calc
