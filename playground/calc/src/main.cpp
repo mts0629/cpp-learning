@@ -4,9 +4,7 @@
 #include "tokenizer.hpp"
 
 int main() {
-    std::vector<char> separators = {'+', '-', '*', '/', ' ', '\t'};
-
-    auto tokenizer = Calc::Tokenizer(separators);
+    auto tokenizer = Calc::Tokenizer();
     auto parser = Calc::Parser();
 
     while (true) {

@@ -1,42 +1,42 @@
 #include "gtest/gtest.h"
 #include "tokenizer.hpp"
 
-TEST(TokenizerTest, Tokenize) {
-    auto separators = std::vector<char>{' '};
-    auto tokenizer = Calc::Tokenizer(separators);
+class TokenizerTest : public ::testing::Test {
+protected:
+    std::unique_ptr<Calc::Tokenizer> tokenizer_;
 
-    EXPECT_EQ((std::vector<std::string>{"hello", "world"}),
-              tokenizer.tokenize("hello world"));
+    virtual void SetUp() { tokenizer_ = std::make_unique<Calc::Tokenizer>(); }
+
+    virtual void TearDown() {}
+};
+
+TEST_F(TokenizerTest, TokenizeBySpace) {
+    EXPECT_EQ((std::vector<std::string>{"1", "+", "2"}),
+              tokenizer_->tokenize("1 + 2"));
 }
 
-TEST(TokenizerTest, NotTokenizeWhenNoSeparator) {
-    auto separators = std::vector<char>{' '};
-    auto tokenizer = Calc::Tokenizer(separators);
-
-    EXPECT_EQ((std::vector<std::string>{"hello_world"}),
-              tokenizer.tokenize("hello_world"));
+TEST_F(TokenizerTest, TokenizeByTab) {
+    EXPECT_EQ((std::vector<std::string>{"1", "+", "2"}),
+              tokenizer_->tokenize("1\t+\t2"));
 }
 
-TEST(TokenizerTest, IgnoreLeadingAndTrailingSeparator) {
-    auto separators = std::vector<char>{' '};
-    auto tokenizer = Calc::Tokenizer(separators);
-
-    EXPECT_EQ((std::vector<std::string>{"hello", "world"}),
-              tokenizer.tokenize("hello world "));
+TEST_F(TokenizerTest, TokenizeByPredefinedSymbols) {
+    EXPECT_EQ(
+        (std::vector<std::string>{"1", "+", "2", "-", "3", "*", "4", "/", "5"}),
+        tokenizer_->tokenize("1+2-3*4/5"));
 }
 
-TEST(TokenizerTest, IgnoreConsecuitiveSeparators) {
-    auto separators = std::vector<char>{' '};
-    auto tokenizer = Calc::Tokenizer(separators);
-
-    EXPECT_EQ((std::vector<std::string>{"hello", "world"}),
-              tokenizer.tokenize("hello  world"));
+TEST_F(TokenizerTest, TokenizeMultipleDigits) {
+    EXPECT_EQ((std::vector<std::string>{"10", "+", "200"}),
+              tokenizer_->tokenize("10+200"));
 }
 
-TEST(TokenizerTest, TokenizeByMultipleSeparators) {
-    auto separators = std::vector<char>{' ', '_'};
-    auto tokenizer = Calc::Tokenizer(separators);
+TEST_F(TokenizerTest, IgnoreLeadingAndTrailingSeparator) {
+    EXPECT_EQ((std::vector<std::string>{"1", "+", "2"}),
+              tokenizer_->tokenize(" 1 + 2 "));
+}
 
-    EXPECT_EQ((std::vector<std::string>{"hello", "good", "world"}),
-              tokenizer.tokenize("hello good_world"));
+TEST_F(TokenizerTest, IgnoreConsecuitiveSeparators) {
+    EXPECT_EQ((std::vector<std::string>{"1", "+", "2"}),
+              tokenizer_->tokenize("1  +   2"));
 }
