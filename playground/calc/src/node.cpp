@@ -4,8 +4,52 @@
 
 namespace Calc {
 
+void Node::attachLeft(std::shared_ptr<Node>& node) {
+    if (this->lhs_) {
+        return;
+    }
+
+    this->lhs_ = node;
+    this->lhs_->parent_ = shared_from_this();
+}
+
+void Node::attachRight(std::shared_ptr<Node>& node) {
+    if (this->rhs_) {
+        return;
+    }
+
+    this->rhs_ = node;
+    this->rhs_->parent_ = shared_from_this();
+}
+
+std::shared_ptr<Node> Node::swapLeft(std::shared_ptr<Node>& node) {
+    if (!this->lhs_) {
+        return nullptr;
+    }
+
+    auto lhs = this->lhs_;
+
+    this->lhs_ = node;
+    this->lhs_->parent_ = shared_from_this();
+
+    return lhs;
+}
+
+std::shared_ptr<Node> Node::swapRight(std::shared_ptr<Node>& node) {
+    if (!this->rhs_) {
+        return nullptr;
+    }
+
+    auto rhs = this->rhs_;
+
+    this->rhs_ = node;
+    this->rhs_->parent_ = shared_from_this();
+
+    return rhs;
+}
+
 double Node::eval() {
-    if (this->type_ == NodeType::NUMBER) {
+    if (this->type_ == NodeType::Number) {
         return this->value_;
     }
 
@@ -17,16 +61,16 @@ double Node::eval() {
     auto rhs = this->rhs_->eval();
 
     switch (this->type_) {
-        case NodeType::ADD:
+        case NodeType::Add:
             this->value_ = lhs + rhs;
             break;
-        case NodeType::SUB:
+        case NodeType::Sub:
             this->value_ = lhs - rhs;
             break;
-        case NodeType::MUL:
+        case NodeType::Mul:
             this->value_ = lhs * rhs;
             break;
-        case NodeType::DIV:
+        case NodeType::Div:
             this->value_ = lhs / rhs;
             break;
         default:

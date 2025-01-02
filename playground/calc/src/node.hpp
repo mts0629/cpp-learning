@@ -7,44 +7,53 @@
 
 namespace Calc {
 
-enum class NodeType { INVALID, NUMBER, ADD, SUB, MUL, DIV };
+enum class NodeType { Invalid, Number, Add, Sub, Mul, Div };
 
-class Node {
+class Node : public std::enable_shared_from_this<Node> {
 public:
     Node(const double value)
-        : type_(NodeType::NUMBER),
+        : type_(NodeType::Number),
           value_(value),
           lhs_(nullptr),
-          rhs_(nullptr) {}
+          rhs_(nullptr),
+          parent_(nullptr) {}
 
     Node(const NodeType op)
-        : type_(op), value_(0), lhs_(nullptr), rhs_(nullptr) {}
+        : type_(op),
+          value_(0),
+          lhs_(nullptr),
+          rhs_(nullptr),
+          parent_(nullptr) {}
 
-    const std::unique_ptr<Node>& left() { return this->lhs_; }
+    ~Node() {}
 
-    const std::unique_ptr<Node>& right() { return this->rhs_; }
+    NodeType type() { return this->type_; }
+
+    const std::shared_ptr<Node>& left() { return this->lhs_; }
+    const std::shared_ptr<Node>& right() { return this->rhs_; }
+    const std::shared_ptr<Node>& parent() { return this->parent_; }
+
+    bool isOperator() {
+        return (this->type_ == NodeType::Add) ||
+               (this->type_ == NodeType::Sub) ||
+               (this->type_ == NodeType::Mul) || (this->type_ == NodeType::Div);
+    }
 
     double eval();
 
-    bool isNumber() { return this->type_ == NodeType::NUMBER; }
+    void attachLeft(std::shared_ptr<Node>& node);
+    void attachRight(std::shared_ptr<Node>& node);
 
-    bool isOperator() { return !isNumber(); }
-
-    void appendLeft(std::unique_ptr<Node>& node) {
-        this->lhs_.reset();
-        this->lhs_ = std::move(node);
-    }
-
-    void appendRight(std::unique_ptr<Node>& node) {
-        this->rhs_.reset();
-        this->rhs_ = std::move(node);
-    }
+    std::shared_ptr<Node> swapLeft(std::shared_ptr<Node>& node);
+    std::shared_ptr<Node> swapRight(std::shared_ptr<Node>& node);
 
 private:
     NodeType type_;
     double value_;
-    std::unique_ptr<Node> lhs_;
-    std::unique_ptr<Node> rhs_;
+
+    std::shared_ptr<Node> lhs_;
+    std::shared_ptr<Node> rhs_;
+    std::shared_ptr<Node> parent_;
 };
 
 }  // namespace Calc

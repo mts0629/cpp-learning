@@ -22,7 +22,7 @@ static bool isOperator(const char c) {
     return false;
 }
 
-static std::unique_ptr<Node> createNumberNode(const std::string& token) {
+static std::shared_ptr<Node> createNumber(const std::string& token) {
     double number = 0;
 
     try {
@@ -35,62 +35,62 @@ static std::unique_ptr<Node> createNumberNode(const std::string& token) {
         throw e;
     }
 
-    return std::make_unique<Node>(number);
+    return std::make_shared<Node>(number);
 }
 
-static std::unique_ptr<Node> createOperatorNode(std::string& token) {
-    NodeType optype = NodeType::INVALID;
+static std::shared_ptr<Node> createOperator(std::string& token) {
+    NodeType optype = NodeType::Invalid;
 
     switch (token[0]) {
         case '+':
-            optype = NodeType::ADD;
+            optype = NodeType::Add;
             break;
         case '-':
-            optype = NodeType::SUB;
+            optype = NodeType::Sub;
             break;
         case '*':
-            optype = NodeType::MUL;
+            optype = NodeType::Mul;
             break;
         case '/':
-            optype = NodeType::DIV;
+            optype = NodeType::Div;
             break;
         default:
             throw std::runtime_error("Invalid operator: " + token);
             break;
     }
 
-    return std::make_unique<Node>(optype);
+    return std::make_shared<Node>(optype);
 }
 
-static std::unique_ptr<Node> createNode(std::string& token) {
+static std::shared_ptr<Node> createNode(std::string& token) {
     if (isOperator(token[0])) {
-        return createOperatorNode(token);
+        return createOperator(token);
     }
 
-    return createNumberNode(token);
+    return createNumber(token);
 }
 
-std::unique_ptr<Node> Parser::parse(const std::vector<std::string>& tokens) {
-    std::unique_ptr<Node> root{nullptr};
+std::shared_ptr<Node> Parser::parse(const std::vector<std::string>& tokens) {
+    std::shared_ptr<Node> root{nullptr};
 
     for (auto token : tokens) {
         auto node = createNode(token);
 
         if (root == nullptr) {
-            root = std::move(node);
+            root = node;
             continue;
         }
 
         if (node->isOperator()) {
-            auto tmp = std::move(root);
-            node->appendLeft(tmp);
+            auto tmp = root;
+            node->attachLeft(tmp);
             root.reset();
-            root = std::move(node);
+            root = node;
         } else {
             if (root->left() == nullptr) {
-                root->appendLeft(node);
+                root->attachLeft(node);
             } else if (root->right() == nullptr) {
-                root->appendRight(node);
+                root->attachRight(node);
             } else {
                 throw std::runtime_error("No corresponding operators to " +
                                          std::to_string(node->eval()));

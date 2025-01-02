@@ -13,7 +13,9 @@ class Parser {
 public:
     Parser(){};
 
-    std::unique_ptr<Node> parse(const std::vector<std::string>& tokens);
+    ~Parser(){};
+
+    std::shared_ptr<Node> parse(const std::vector<std::string>& tokens);
 };
 
 }  // namespace Calc
