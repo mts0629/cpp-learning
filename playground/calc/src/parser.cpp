@@ -3,10 +3,18 @@
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
+#include <unordered_map>
 
 namespace {
 
 static std::vector<char> operators = {'+', '-', '*', '/'};
+
+static std::unordered_map<Calc::NodeType, int> node_priority = {
+    {Calc::NodeType::Add, 0},
+    {Calc::NodeType::Sub, 0},
+    {Calc::NodeType::Mul, 1},
+    {Calc::NodeType::Div, 1},
+};
 
 }  // namespace
 
@@ -70,32 +78,74 @@ static std::shared_ptr<Node> createNode(std::string& token) {
     return createNumber(token);
 }
 
-std::shared_ptr<Node> Parser::parse(const std::vector<std::string>& tokens) {
-    std::shared_ptr<Node> root{nullptr};
+static std::shared_ptr<Node>& assignNextNode(std::shared_ptr<Node>& current,
+                                             std::shared_ptr<Node>& root,
+                                             std::shared_ptr<Node>& next) {
+    if (!current) {
+        root = next;
+        return next;
+    }
 
-    for (auto token : tokens) {
-        auto node = createNode(token);
+    if (next->isOperator()) {
+        auto current_type = current->type();
+        auto next_type = next->type();
 
-        if (root == nullptr) {
-            root = node;
-            continue;
+        if (current_type == Calc::NodeType::Number) {
+            next->attachLeft(current);
+            root = next;
+            return next;
         }
 
-        if (node->isOperator()) {
-            auto tmp = root;
-            node->attachLeft(tmp);
-            root.reset();
-            root = node;
-        } else {
-            if (root->left() == nullptr) {
-                root->attachLeft(node);
-            } else if (root->right() == nullptr) {
-                root->attachRight(node);
+        // Attach the next node based on the priority of operators
+        if (node_priority[next_type] > node_priority[current_type]) {
+            // If the next node is higher priority
+            auto prev_rhs = current->swapRight(next);
+            next->attachLeft(prev_rhs);
+            return next;
+        } else if (node_priority[next_type] < node_priority[current_type]) {
+            // If the next node is lower priority
+            if (current->parent()) {
+                auto parent = current->parent();
+                return assignNextNode(parent, root, next);
             } else {
-                throw std::runtime_error("No corresponding operators to " +
-                                         std::to_string(node->eval()));
+                next->attachLeft(current);
+                root = next;
+                return next;
+            }
+        } else {
+            // Next node is same priority
+            if (current->parent()) {
+                auto parent = current->parent();
+                return assignNextNode(parent, root, next);
+            } else {
+                next->attachLeft(current);
+                root = next;
+                return next;
             }
         }
+    } else {
+        if (next->type() == Calc::NodeType::Number) {
+            if (current->right()) {
+                throw std::runtime_error("No corresponding operators to " +
+                                         std::to_string(next->eval()));
+            }
+
+            current->attachRight(next);
+        } else {
+            throw std::runtime_error("Node type is invalid");
+        }
+    }
+
+    return current;
+}
+
+std::shared_ptr<Node> Parser::parse(const std::vector<std::string>& tokens) {
+    std::shared_ptr<Node> root{nullptr};
+    std::shared_ptr<Node> current = root;
+
+    for (auto token : tokens) {
+        auto next = createNode(token);
+        current = assignNextNode(current, root, next);
     }
 
     return root;
