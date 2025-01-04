@@ -40,3 +40,15 @@ TEST_F(TokenizerTest, IgnoreConsecuitiveSeparators) {
     EXPECT_EQ((std::vector<std::string>{"1", "+", "2"}),
               tokenizer_->tokenize("1  +   2"));
 }
+
+TEST_F(TokenizerTest, TokenizeNumberWithDecimalPoint) {
+    EXPECT_EQ((std::vector<std::string>{"3.14"}), tokenizer_->tokenize("3.14"));
+}
+
+TEST_F(TokenizerTest, TokenizeNumberWithDecimalPoint_) {
+    EXPECT_EQ((std::vector<std::string>{".14"}), tokenizer_->tokenize(".14"));
+}
+
+TEST_F(TokenizerTest, TokenizeNumberWithDecimalPoint__) {
+    EXPECT_EQ((std::vector<std::string>{"3."}), tokenizer_->tokenize("3."));
+}

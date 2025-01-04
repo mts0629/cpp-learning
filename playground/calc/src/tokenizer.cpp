@@ -31,17 +31,26 @@ static bool isPredefinedSymbol(const std::string& str) {
 }
 
 static bool isNumberCharacter(const char c) {
-    return isdigit(c) ? true : false;
+    return (isdigit(c) || c == '.') ? true : false;
 }
 
-bool isNumber(const std::string& str) {
+static bool isNumberStart(const char prev_c, const char c) {
+    return !isNumberCharacter(prev_c) && isNumberCharacter(c);
+}
+
+static bool isNumberFinished(const char prev_c, const char c) {
+    return isNumberCharacter(prev_c) && !isNumberCharacter(c);
+}
+
+/*static bool isNumber(const std::string& str) {
+    auto point = false;
     for (auto c : str) {
         if (!isNumberCharacter(c)) {
             return false;
         }
     }
     return true;
-}
+}*/
 
 static bool isStreamEmpty(std::ostringstream& buf) {
     return buf.tellp() == std::streampos(0);
@@ -61,6 +70,7 @@ std::vector<std::string> Tokenizer::tokenize(std::string str) {
     std::ostringstream buf{};
     std::vector<std::string> tokens{};
 
+    char prev_c = str[0];
     for (auto it = str.begin(); it != str.end(); ++it) {
         auto c = *it;
 
@@ -70,31 +80,22 @@ std::vector<std::string> Tokenizer::tokenize(std::string str) {
             continue;
         }
 
-        // Store a character when the buffer is empty
-        if (isStreamEmpty(buf)) {
-            buf << c;
-            continue;
-        }
-
-        auto current_token = buf.str();
-
-        // Tokenize the buffer when it's defined symbol
-        if (isPredefinedSymbol(current_token)) {
-            tokenizeCurrentBuffer(tokens, buf);
-            // Tokenize the buffer when the character type is
-            // changed between number and non-number
-        } else if (isNumberCharacter(c)) {
-            if (!isNumber(current_token)) {
+        if (!isStreamEmpty(buf)) {
+            auto current_token = buf.str();
+            // Tokenize the buffer when it's defined symbol
+            if (isPredefinedSymbol(current_token)) {
                 tokenizeCurrentBuffer(tokens, buf);
-            }
-        } else {
-            if (isNumber(current_token)) {
+                // Tokenize the buffer when the character type is changed
+                // between number and non-number
+            } else if (isNumberStart(prev_c, c) ||
+                       isNumberFinished(prev_c, c)) {
                 tokenizeCurrentBuffer(tokens, buf);
             }
         }
 
-        // Store a character
+        // Store the next character
         buf << c;
+        prev_c = c;
     }
 
     // Flush the last token

@@ -27,6 +27,13 @@ TEST_F(ParserTest, EvaluateOne) {
     EXPECT_EQ(1, expr->eval());
 }
 
+TEST_F(ParserTest, EvaluatePi) {
+    auto tokens = createTokens("3.14");
+    auto expr = parser_->parse(tokens);
+
+    EXPECT_EQ(3.14, expr->eval());
+}
+
 TEST_F(ParserTest, EvaluateOnePlusTwo) {
     auto tokens = createTokens("1", "+", "2");
     auto expr = parser_->parse(tokens);
