@@ -3,21 +3,27 @@
 #include "parser.hpp"
 #include "tokenizer.hpp"
 
+std::string get_input() {
+    std::string input{};
+    std::getline(std::cin, input);
+
+    return input;
+}
+
 int main() {
     auto tokenizer = Calc::Tokenizer();
     auto parser = Calc::Parser();
 
     while (true) {
         std::cout << "> ";
-        std::string user_input{};
-        std::getline(std::cin, user_input);
+        std::string input = get_input();
 
-        if (user_input == "q") {
+        if (input == "q") {
             break;
         }
 
         try {
-            auto tokens = tokenizer.tokenize(user_input);
+            auto tokens = tokenizer.tokenize(input);
             auto expr = parser.parse(tokens);
             std::cout << expr->eval() << std::endl;
         } catch (const std::exception& e) {
