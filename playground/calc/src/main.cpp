@@ -3,11 +3,16 @@
 #include "parser.hpp"
 #include "tokenizer.hpp"
 
-std::string get_input() {
+static std::string getInput() {
+    std::cout << "> ";
     std::string input{};
     std::getline(std::cin, input);
 
     return input;
+}
+
+static bool isQuitCommand(std::string& input) {
+    return ((input == "q") || (input == "quit"));
 }
 
 int main() {
@@ -15,14 +20,12 @@ int main() {
     auto parser = Calc::Parser();
 
     while (true) {
-        std::cout << "> ";
-        std::string input = get_input();
-
-        if (input == "q") {
-            break;
-        }
-
         try {
+            std::string input = getInput();
+            if (isQuitCommand(input)) {
+                break;
+            }
+
             auto tokens = tokenizer.tokenize(input);
             auto expr = parser.parse(tokens);
             std::cout << expr->eval() << std::endl;
