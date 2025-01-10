@@ -70,43 +70,62 @@ static std::shared_ptr<Node> createOperator(const std::string& token) {
     return std::make_shared<Node>(optype);
 }
 
-static std::shared_ptr<Node> createNode(const std::string& token) {
-    if (isOperator(token[0])) {
-        return createOperator(token);
-    }
-
-    return createNumber(token);
+static std::shared_ptr<Node> factor(
+    std::vector<std::string>::const_iterator& it) {
+    auto factor = createNumber(*it);
+    ++it;
+    return factor;
 }
 
-std::shared_ptr<Node> Parser::parse(const std::vector<std::string>& tokens) {
-    if (tokens.size() == 1) {
-        return createNode(tokens[0]);
-    }
+static std::shared_ptr<Node> term(
+    const std::vector<std::string>& tokens,
+    std::vector<std::string>::const_iterator& it) {
+    auto left = factor(it);
 
-    auto op_it = tokens.cbegin();
-    auto least_priority = INT32_MAX;
-    std::shared_ptr<Node> op {nullptr};
-    for (auto it = tokens.cbegin(); it != tokens.cend(); ++it) {
-        if (isOperator((*it)[0])) {
-            op = createNode(*it);
-            auto priority = node_priority[op->type()];
-            if (priority < least_priority) {
-                op_it = it;
-                least_priority = priority;
-            }
+    while (it != tokens.end()) {
+        if ((*it == "*") || (*it == "/")) {
+            auto op = createOperator(*it);
+            ++it;
+            auto right = term(tokens, it);
+
+            op->attachLeft(left);
+            op->attachRight(right);
+
+            return op;
+        } else {
+            break;
         }
     }
 
-    op = createNode(*op_it);
-    std::vector<std::string> left{tokens.cbegin(), op_it};
-    std::vector<std::string> right{++op_it, tokens.cend()};
+    return left;
+}
 
-    auto lhs = parse(left);
-    auto rhs = parse(right);
-    op->attachLeft(lhs);
-    op->attachRight(rhs);
+static std::shared_ptr<Node> expr(
+    const std::vector<std::string>& tokens,
+    std::vector<std::string>::const_iterator& it) {
+    auto left = term(tokens, it);
 
-    return op;
+    while (it != tokens.end()) {
+        if ((*it == "+") || (*it == "-")) {
+            auto op = createOperator(*it);
+            ++it;
+            auto right = expr(tokens, it);
+
+            op->attachLeft(left);
+            op->attachRight(right);
+
+            return op;
+        } else {
+            break;
+        }
+    }
+
+    return left;
+}
+
+std::shared_ptr<Node> Parser::parse(const std::vector<std::string>& tokens) {
+    std::vector<std::string>::const_iterator it{tokens.begin()};
+    return expr(tokens, it);
 }
 
 }  // namespace Calc

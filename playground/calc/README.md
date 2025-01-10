@@ -54,3 +54,7 @@ Unlicense
 ### GoogleTest
 
 BSD 3-Clause License
+
+## References
+
+- [再帰下降法でC言語数式パーサーもどきを作ってみる](https://zenn.dev/nomunomu0504/articles/a8504ec7a18744)
