@@ -5,30 +5,7 @@
 #include <stdexcept>
 #include <unordered_map>
 
-namespace {
-
-static std::vector<char> operators = {'+', '-', '*', '/'};
-
-static std::unordered_map<Calc::NodeType, int> node_priority = {
-    {Calc::NodeType::Add, 0},
-    {Calc::NodeType::Sub, 0},
-    {Calc::NodeType::Mul, 1},
-    {Calc::NodeType::Div, 1},
-};
-
-}  // namespace
-
 namespace Calc {
-
-static bool isOperator(const char c) {
-    for (auto s : operators) {
-        if (c == s) {
-            return true;
-        }
-    }
-
-    return false;
-}
 
 static std::shared_ptr<Node> createNumber(const std::string& token) {
     double number = 0;
@@ -70,8 +47,24 @@ static std::shared_ptr<Node> createOperator(const std::string& token) {
     return std::make_shared<Node>(optype);
 }
 
+static std::shared_ptr<Node> expr(const std::vector<std::string>& tokens,
+                                  std::vector<std::string>::const_iterator& it);
+
 static std::shared_ptr<Node> factor(
+    const std::vector<std::string>& tokens,
     std::vector<std::string>::const_iterator& it) {
+    if (*it == "(") {
+        ++it;
+        auto inner_expr = expr(tokens, it);
+
+        while (*it != ")") {
+            ++it;
+        }
+        ++it;
+
+        return inner_expr;
+    }
+
     auto factor = createNumber(*it);
     ++it;
     return factor;
@@ -80,7 +73,7 @@ static std::shared_ptr<Node> factor(
 static std::shared_ptr<Node> term(
     const std::vector<std::string>& tokens,
     std::vector<std::string>::const_iterator& it) {
-    auto left = factor(it);
+    auto left = factor(tokens, it);
 
     while (it != tokens.end()) {
         if ((*it == "*") || (*it == "/")) {

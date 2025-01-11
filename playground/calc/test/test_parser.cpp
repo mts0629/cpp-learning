@@ -110,3 +110,26 @@ TEST_F(ParserTest, EvaluateOneDividedByTwoPlusThreeTimesFour) {
 
     EXPECT_EQ(12.5, expr->eval());
 }
+
+TEST_F(ParserTest, EvaluateParentheses) {
+    auto tokens = createTokens("(", "1", "+", "2", ")", "*", "(", "3", "+", "4",
+                               ")", "+", "5");
+    auto expr = parser_->parse(tokens);
+
+    EXPECT_EQ(26, expr->eval());
+}
+
+TEST_F(ParserTest, EvaluateNestedParentheses) {
+    auto tokens = createTokens("(", "(", "1", "+", "2", ")", "*", "(", "3", "+",
+                               "4", ")", ")", "*", "5");
+    auto expr = parser_->parse(tokens);
+
+    EXPECT_EQ(105, expr->eval());
+}
+
+TEST_F(ParserTest, EvaluateOnlyParenthesesTerm) {
+    auto tokens = createTokens("(", "1", "+", "2", ")");
+    auto expr = parser_->parse(tokens);
+
+    EXPECT_EQ(3, expr->eval());
+}
