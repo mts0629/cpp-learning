@@ -11,26 +11,22 @@ static std::string getInput() {
     return input;
 }
 
-static bool isQuitCommand(std::string& input) {
-    return ((input == "q") || (input == "quit"));
-}
+static bool isQuitCommand(std::string& input) { return input == "quit"; }
 
 int main() {
     auto tokenizer = Calc::Tokenizer();
     auto parser = Calc::Parser();
 
     while (true) {
-        try {
-            std::string input = getInput();
-            if (isQuitCommand(input)) {
-                break;
-            }
+        std::string input = getInput();
+        if (isQuitCommand(input)) {
+            break;
+        }
 
-            auto tokens = tokenizer.tokenize(input);
-            auto expr = parser.parse(tokens);
+        auto tokens = tokenizer.tokenize(input);
+        auto expr = parser.parse(tokens);
+        if (expr == nullptr) {
             std::cout << expr->eval() << std::endl;
-        } catch (const std::exception& e) {
-            (void)e;
         }
     }
 

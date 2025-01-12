@@ -1,52 +1,19 @@
 #include "node.hpp"
 
-#include <stdexcept>
+#include <iostream>
+#include <limits>
+#include <unordered_map>
+
+namespace {
+
+std::unordered_map<std::string, Calc::NodeType> operator_table = {
+    {"+", Calc::NodeType::Add},
+    {"-", Calc::NodeType::Sub},
+    {"*", Calc::NodeType::Mul},
+    {"/", Calc::NodeType::Div}};
+}
 
 namespace Calc {
-
-void Node::attachLeft(std::shared_ptr<Node>& node) {
-    if (this->lhs_) {
-        return;
-    }
-
-    this->lhs_ = node;
-    this->lhs_->parent_ = shared_from_this();
-}
-
-void Node::attachRight(std::shared_ptr<Node>& node) {
-    if (this->rhs_) {
-        return;
-    }
-
-    this->rhs_ = node;
-    this->rhs_->parent_ = shared_from_this();
-}
-
-std::shared_ptr<Node> Node::swapLeft(std::shared_ptr<Node>& node) {
-    if (!this->lhs_) {
-        return nullptr;
-    }
-
-    auto lhs = this->lhs_;
-
-    this->lhs_ = node;
-    this->lhs_->parent_ = shared_from_this();
-
-    return lhs;
-}
-
-std::shared_ptr<Node> Node::swapRight(std::shared_ptr<Node>& node) {
-    if (!this->rhs_) {
-        return nullptr;
-    }
-
-    auto rhs = this->rhs_;
-
-    this->rhs_ = node;
-    this->rhs_->parent_ = shared_from_this();
-
-    return rhs;
-}
 
 double Node::eval() {
     if (this->type_ == NodeType::Number) {
@@ -54,7 +21,8 @@ double Node::eval() {
     }
 
     if ((this->lhs_ == nullptr) || (this->rhs_ == nullptr)) {
-        throw std::runtime_error("Operands are lacking");
+        std::cerr << "[Error] operand is lacking\n";
+        return std::numeric_limits<double>::infinity();
     }
 
     auto lhs = this->lhs_->eval();
@@ -74,11 +42,44 @@ double Node::eval() {
             this->value_ = lhs / rhs;
             break;
         default:
-            throw std::runtime_error("Invalid operator");
+            std::cerr << "[Error] invalid operator\n";
+            return std::numeric_limits<double>::infinity();
             break;
     }
 
     return this->value_;
+}
+
+std::shared_ptr<Node> Node::CreateNumber(const std::string& token) {
+    double number = 0;
+
+    try {
+        number = stod(token);
+    } catch (const std::invalid_argument& e) {
+        std::cerr << "[Error] invalid token: \"" << token << "\"\n";
+        return nullptr;
+    } catch (const std::out_of_range& e) {
+        std::cerr << "[Error] value " << token
+                  << " is out of range of `double`\n";
+        return nullptr;
+    }
+
+    return std::make_shared<Node>(number);
+}
+
+static bool operator_is_invalid(const std::string& token) {
+    return operator_table.find(token) == operator_table.end();
+}
+
+std::shared_ptr<Node> Node::CreateBinaryOperator(const std::string& token,
+                                                 std::shared_ptr<Node>& left,
+                                                 std::shared_ptr<Node>& right) {
+    if (operator_is_invalid(token)) {
+        std::cerr << "[Error] invalid token: \"" + token + "\"\n";
+        return nullptr;
+    }
+
+    return std::make_shared<Node>(operator_table[token], left, right);
 }
 
 }  // namespace Calc

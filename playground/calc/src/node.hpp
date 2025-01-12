@@ -15,15 +15,11 @@ public:
         : type_(NodeType::Number),
           value_(value),
           lhs_(nullptr),
-          rhs_(nullptr),
-          parent_(nullptr) {}
+          rhs_(nullptr) {}
 
-    Node(const NodeType op)
-        : type_(op),
-          value_(0),
-          lhs_(nullptr),
-          rhs_(nullptr),
-          parent_(nullptr) {}
+    Node(const NodeType op, const std::shared_ptr<Node> left,
+         const std::shared_ptr<Node> right)
+        : type_(op), value_(0), lhs_(left), rhs_(right) {}
 
     ~Node() {}
 
@@ -31,21 +27,14 @@ public:
 
     const std::shared_ptr<Node>& left() { return this->lhs_; }
     const std::shared_ptr<Node>& right() { return this->rhs_; }
-    const std::shared_ptr<Node>& parent() { return this->parent_; }
-
-    bool isOperator() {
-        return (this->type_ == NodeType::Add) ||
-               (this->type_ == NodeType::Sub) ||
-               (this->type_ == NodeType::Mul) || (this->type_ == NodeType::Div);
-    }
 
     double eval();
 
-    void attachLeft(std::shared_ptr<Node>& node);
-    void attachRight(std::shared_ptr<Node>& node);
+    static std::shared_ptr<Node> CreateNumber(const std::string& token);
 
-    std::shared_ptr<Node> swapLeft(std::shared_ptr<Node>& node);
-    std::shared_ptr<Node> swapRight(std::shared_ptr<Node>& node);
+    static std::shared_ptr<Node> CreateBinaryOperator(
+        const std::string& token, std::shared_ptr<Node>& left,
+        std::shared_ptr<Node>& right);
 
 private:
     NodeType type_;
@@ -53,7 +42,6 @@ private:
 
     std::shared_ptr<Node> lhs_;
     std::shared_ptr<Node> rhs_;
-    std::shared_ptr<Node> parent_;
 };
 
 }  // namespace Calc

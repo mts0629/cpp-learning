@@ -2,130 +2,163 @@
 #include "node.hpp"
 
 TEST(NodeTest, CreateNumber) {
-    Calc::Node n(1);
+    auto node = Calc::Node::CreateNumber("3.14");
 
-    EXPECT_EQ(Calc::NodeType::Number, n.type());
-    EXPECT_EQ(1, n.eval());
+    EXPECT_EQ(Calc::NodeType::Number, node->type());
+    EXPECT_EQ(3.14, node->eval());
+}
+
+TEST(NodeTest, TokenIsInvalid) {
+    ::testing::internal::CaptureStderr();
+    auto node = Calc::Node::CreateNumber("???");
+
+    EXPECT_EQ(nullptr, node);
+    ASSERT_STREQ("[Error] invalid token: \"???\"\n",
+                 ::testing::internal::GetCapturedStderr().c_str());
+}
+
+TEST(NodeTest, ValueIsOutOfRange) {
+    ::testing::internal::CaptureStderr();
+    auto node = Calc::Node::CreateNumber("1e+309");
+
+    EXPECT_EQ(nullptr, node);
+    ASSERT_STREQ("[Error] value 1e+309 is out of range of `double`\n",
+                 ::testing::internal::GetCapturedStderr().c_str());
 }
 
 TEST(NodeTest, OnePlusTwo) {
-    auto a = std::make_shared<Calc::Node>(1);
-    auto b = std::make_shared<Calc::Node>(2);
-    auto add = std::make_shared<Calc::Node>(Calc::NodeType::Add);
-    add->attachLeft(a);
-    add->attachRight(b);
+    auto a = Calc::Node::CreateNumber("1");
+    auto b = Calc::Node::CreateNumber("2");
+    auto node = Calc::Node::CreateBinaryOperator("+", a, b);
 
-    EXPECT_EQ(Calc::NodeType::Add, add->type());
-    EXPECT_EQ(1, add->left()->eval());
-    EXPECT_EQ(add, add->left()->parent());
-    EXPECT_EQ(2, add->right()->eval());
-    EXPECT_EQ(add, add->right()->parent());
-    EXPECT_EQ(3, add->eval());
-}
-
-TEST(NodeTest, OneMinusTwo) {
-    auto a = std::make_shared<Calc::Node>(1);
-    auto b = std::make_shared<Calc::Node>(2);
-    auto sub = std::make_shared<Calc::Node>(Calc::NodeType::Sub);
-    sub->attachLeft(a);
-    sub->attachRight(b);
-
-    EXPECT_EQ(Calc::NodeType::Sub, sub->type());
-    EXPECT_EQ(1, sub->left()->eval());
-    EXPECT_EQ(2, sub->right()->eval());
-    EXPECT_EQ(-1, sub->eval());
-}
-
-TEST(NodeTest, OneTimesTwo) {
-    auto a = std::make_shared<Calc::Node>(1);
-    auto b = std::make_shared<Calc::Node>(2);
-    auto mul = std::make_shared<Calc::Node>(Calc::NodeType::Mul);
-    mul->attachLeft(a);
-    mul->attachRight(b);
-
-    EXPECT_EQ(Calc::NodeType::Mul, mul->type());
-    EXPECT_EQ(1, mul->left()->eval());
-    EXPECT_EQ(2, mul->right()->eval());
-    EXPECT_EQ(2, mul->eval());
-}
-
-TEST(NodeTest, OneDividedByTwo) {
-    auto a = std::make_shared<Calc::Node>(1);
-    auto b = std::make_shared<Calc::Node>(2);
-    auto div = std::make_shared<Calc::Node>(Calc::NodeType::Div);
-    div->attachLeft(a);
-    div->attachRight(b);
-
-    EXPECT_EQ(Calc::NodeType::Div, div->type());
-    EXPECT_EQ(1, div->left()->eval());
-    EXPECT_EQ(2, div->right()->eval());
-    EXPECT_EQ(0.5, div->eval());
-}
-
-TEST(NodeTest, OnePlusTwoMinusThree) {
-    auto a = std::make_shared<Calc::Node>(1);
-    auto b = std::make_shared<Calc::Node>(2);
-    auto add = std::make_shared<Calc::Node>(Calc::NodeType::Add);
-    add->attachLeft(a);
-    add->attachRight(b);
-
-    auto c = std::make_shared<Calc::Node>(3);
-    auto sub = std::make_shared<Calc::Node>(Calc::NodeType::Sub);
-    sub->attachLeft(add);
-    sub->attachRight(c);
-
-    EXPECT_EQ(0, sub->eval());
-
-    auto node = sub->left();
-    EXPECT_EQ(sub, node->parent());
+    EXPECT_EQ(Calc::NodeType::Add, node->type());
     EXPECT_EQ(1, node->left()->eval());
     EXPECT_EQ(2, node->right()->eval());
     EXPECT_EQ(3, node->eval());
 }
 
+TEST(NodeTest, OneMinusTwo) {
+    auto a = Calc::Node::CreateNumber("1");
+    auto b = Calc::Node::CreateNumber("2");
+    auto node = Calc::Node::CreateBinaryOperator("-", a, b);
+
+    EXPECT_EQ(Calc::NodeType::Sub, node->type());
+    EXPECT_EQ(1, node->left()->eval());
+    EXPECT_EQ(2, node->right()->eval());
+    EXPECT_EQ(-1, node->eval());
+}
+
+TEST(NodeTest, OneTimesTwo) {
+    auto a = Calc::Node::CreateNumber("3.14");
+    auto b = Calc::Node::CreateNumber("2");
+    auto node = Calc::Node::CreateBinaryOperator("*", a, b);
+
+    EXPECT_EQ(Calc::NodeType::Mul, node->type());
+    EXPECT_EQ(3.14, node->left()->eval());
+    EXPECT_EQ(2, node->right()->eval());
+    EXPECT_EQ(6.28, node->eval());
+}
+
+TEST(NodeTest, OneDividedByTwo) {
+    auto a = Calc::Node::CreateNumber("1");
+    auto b = Calc::Node::CreateNumber("2");
+    auto node = Calc::Node::CreateBinaryOperator("/", a, b);
+
+    EXPECT_EQ(Calc::NodeType::Div, node->type());
+    EXPECT_EQ(1, node->left()->eval());
+    EXPECT_EQ(2, node->right()->eval());
+    EXPECT_EQ(0.5, node->eval());
+}
+
+TEST(NodeTest, OnePlusTwoMinusThree) {
+    auto a = Calc::Node::CreateNumber("1");
+    auto b = Calc::Node::CreateNumber("2");
+    auto a_plus_b = Calc::Node::CreateBinaryOperator("+", a, b);
+    auto c = Calc::Node::CreateNumber("3");
+    auto node = Calc::Node::CreateBinaryOperator("-", a_plus_b, c);
+
+    EXPECT_EQ(0, node->eval());
+
+    auto left = node->left();
+    EXPECT_EQ(1, left->left()->eval());
+    EXPECT_EQ(2, left->right()->eval());
+    EXPECT_EQ(3, left->eval());
+}
+
 TEST(NodeTest, OnePlusTwoTimesThree) {
-    auto b = std::make_shared<Calc::Node>(2);
-    auto c = std::make_shared<Calc::Node>(3);
-    auto mul = std::make_shared<Calc::Node>(Calc::NodeType::Mul);
-    mul->attachLeft(b);
-    mul->attachRight(c);
+    auto a = Calc::Node::CreateNumber("1");
+    auto b = Calc::Node::CreateNumber("2");
+    auto c = Calc::Node::CreateNumber("3");
+    auto b_times_c = Calc::Node::CreateBinaryOperator("*", b, c);
+    auto node = Calc::Node::CreateBinaryOperator("+", a, b_times_c);
 
-    auto a = std::make_shared<Calc::Node>(1);
-    auto add = std::make_shared<Calc::Node>(Calc::NodeType::Add);
-    add->attachLeft(a);
-    add->attachRight(mul);
+    EXPECT_EQ(7, node->eval());
 
-    EXPECT_EQ(7, add->eval());
-
-    EXPECT_EQ(add, add->left()->parent());
+    auto right = node->right();
+    EXPECT_EQ(2, right->left()->eval());
+    EXPECT_EQ(3, right->right()->eval());
+    EXPECT_EQ(6, right->eval());
 }
 
-TEST(NodeTest, SwapLeft) {
-    auto a = std::make_shared<Calc::Node>(1);
-    auto b = std::make_shared<Calc::Node>(2);
-    auto add = std::make_shared<Calc::Node>(Calc::NodeType::Add);
-    add->attachLeft(a);
-    add->attachRight(b);
+TEST(NodeTest, OnePlusTwoFirstly_AndThenItTimesThree) {
+    auto a = Calc::Node::CreateNumber("1");
+    auto b = Calc::Node::CreateNumber("2");
+    auto c = Calc::Node::CreateNumber("3");
+    auto a_plus_b = Calc::Node::CreateBinaryOperator("+", a, b);
+    auto node = Calc::Node::CreateBinaryOperator("*", a_plus_b, c);
 
-    auto c = std::make_shared<Calc::Node>(3);
-    auto removed = add->swapLeft(c);
+    EXPECT_EQ(9, node->eval());
 
-    EXPECT_EQ(1, removed->eval());
-    EXPECT_EQ(3, add->left()->eval());
-    EXPECT_EQ(5, add->eval());
+    auto left = node->left();
+    EXPECT_EQ(1, left->left()->eval());
+    EXPECT_EQ(2, left->right()->eval());
+    EXPECT_EQ(3, left->eval());
 }
 
-TEST(NodeTest, SwapRight) {
-    auto a = std::make_shared<Calc::Node>(1);
-    auto b = std::make_shared<Calc::Node>(2);
-    auto add = std::make_shared<Calc::Node>(Calc::NodeType::Add);
-    add->attachLeft(a);
-    add->attachRight(b);
+TEST(NodeTest, InvalidOperator) {
+    auto a = Calc::Node::CreateNumber("1");
+    auto b = Calc::Node::CreateNumber("2");
 
-    auto c = std::make_shared<Calc::Node>(3);
-    auto removed = add->swapRight(c);
+    ::testing::internal::CaptureStderr();
+    auto node = Calc::Node::CreateBinaryOperator("?", a, b);
 
-    EXPECT_EQ(2, removed->eval());
-    EXPECT_EQ(3, add->right()->eval());
-    EXPECT_EQ(4, add->eval());
+    EXPECT_EQ(nullptr, node);
+    ASSERT_STREQ("[Error] invalid token: \"?\"\n",
+                 ::testing::internal::GetCapturedStderr().c_str());
+}
+
+TEST(NodeTest, EvaluateInvalidOperator) {
+    auto a = Calc::Node::CreateNumber("1");
+    auto b = Calc::Node::CreateNumber("2");
+
+    ::testing::internal::CaptureStderr();
+    Calc::Node node(Calc::NodeType::Invalid, a, b);
+
+    EXPECT_EQ(std::numeric_limits<double>::infinity(), node.eval());
+    ASSERT_STREQ("[Error] invalid operator\n",
+                 ::testing::internal::GetCapturedStderr().c_str());
+}
+
+TEST(NodeTest, EvaluateBinaryOperatorWithoutLhs) {
+    std::shared_ptr<Calc::Node> a{nullptr};
+    auto b = Calc::Node::CreateNumber("2");
+
+    ::testing::internal::CaptureStderr();
+    auto node = Calc::Node::CreateBinaryOperator("+", a, b);
+
+    EXPECT_EQ(std::numeric_limits<double>::infinity(), node->eval());
+    ASSERT_STREQ("[Error] operand is lacking\n",
+                 ::testing::internal::GetCapturedStderr().c_str());
+}
+
+TEST(NodeTest, EvaluateBinaryOperatorWithoutRhs) {
+    auto a = Calc::Node::CreateNumber("1");
+    std::shared_ptr<Calc::Node> b{nullptr};
+
+    ::testing::internal::CaptureStderr();
+    auto node = Calc::Node::CreateBinaryOperator("+", a, b);
+
+    EXPECT_EQ(std::numeric_limits<double>::infinity(), node->eval());
+    ASSERT_STREQ("[Error] operand is lacking\n",
+                 ::testing::internal::GetCapturedStderr().c_str());
 }

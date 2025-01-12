@@ -133,3 +133,32 @@ TEST_F(ParserTest, EvaluateOnlyParenthesesTerm) {
 
     EXPECT_EQ(3, expr->eval());
 }
+
+TEST_F(ParserTest, ReturnNullptrWhenLhsIsInvalidToken) {
+    auto tokens = createTokens("???", "+", "1");
+
+    ::testing::internal::CaptureStderr();
+    auto expr = parser_->parse(tokens);
+
+    EXPECT_EQ(nullptr, expr);
+    ASSERT_STREQ("[Error] invalid token: \"???\"\n",
+                 ::testing::internal::GetCapturedStderr().c_str());
+}
+
+TEST_F(ParserTest, ReturnNullptrWhenRhsIsInvalidToken) {
+    auto tokens = createTokens("1", "+", "???");
+
+    ::testing::internal::CaptureStderr();
+    auto expr = parser_->parse(tokens);
+
+    EXPECT_EQ(nullptr, expr);
+    ASSERT_STREQ("[Error] invalid token: \"???\"\n",
+                 ::testing::internal::GetCapturedStderr().c_str());
+}
+
+TEST_F(ParserTest, ReturnNullptrWhenTokensAreEmpty) {
+    std::vector<std::string> tokens{};
+    auto expr = parser_->parse(tokens);
+
+    EXPECT_EQ(nullptr, expr);
+}

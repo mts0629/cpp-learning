@@ -60,3 +60,8 @@ TEST_F(TokenizerTest, TokenizeParentheses) {
                                         "+", "4", ")"}),
               tokenizer_->tokenize("(1+2)*(3+4)"));
 }
+
+TEST_F(TokenizerTest, ReturnEmptyVectorWhenEmptyStringIsInput) {
+    std::vector<std::string> empty{};
+    EXPECT_EQ(empty, tokenizer_->tokenize(""));
+}

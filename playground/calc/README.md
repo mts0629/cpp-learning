@@ -4,26 +4,31 @@ Commandline calculator
 
 ```sh
 $ ./calc
-> 1+2+3
+> 1 + 2 + 3
 6
-> 4*5-6
+> 4 * 5 - 6
 14
+> (7 + 8) / 9
+1.66667
+> 3.14*2*2
+12.56
+> quit # Finish calculation
 ```
 
 ## Prereqiusites
 
 - GNU g++ (C++14)
 - CMake (>= 3.22)
-- clang-format
+- clang-format (>= 13.0.0)
 - GoogleTest (v.1.15.2)
 
 ## Directories
 
 ```
 calc/
-  |- src/ ... Headers and sources
-  |- test/ ... Tests
-  |- .clang-format ... Format configuration
+  |- src/ ... headers and sources
+  |- test/ ... unit tests
+  |- .clang-format ... formatter configuration
   |- googletest/ ... license of GoogleTest (BSD-3-Clause license)
   |- LICENSE
   `- README.md
@@ -36,7 +41,7 @@ $ cmake -S . -B ./build
 $ cmake --build ./build
 ```
 
-Target binary is built as `./build/calc`.
+Executable binary is built as `./build/calc`.
 
 ## Test
 

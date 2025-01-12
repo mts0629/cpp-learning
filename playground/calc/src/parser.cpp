@@ -1,51 +1,9 @@
 #include "parser.hpp"
 
-#include <iostream>
 #include <sstream>
-#include <stdexcept>
 #include <unordered_map>
 
 namespace Calc {
-
-static std::shared_ptr<Node> createNumber(const std::string& token) {
-    double number = 0;
-
-    try {
-        number = stod(token);
-    } catch (const std::invalid_argument& e) {
-        std::cout << "Invalid token: \"" << token << "\"" << std::endl;
-        throw e;
-    } catch (const std::out_of_range& e) {
-        std::cout << "Value \"" << token << "\" is out of range" << std::endl;
-        throw e;
-    }
-
-    return std::make_shared<Node>(number);
-}
-
-static std::shared_ptr<Node> createOperator(const std::string& token) {
-    NodeType optype = NodeType::Invalid;
-
-    switch (token[0]) {
-        case '+':
-            optype = NodeType::Add;
-            break;
-        case '-':
-            optype = NodeType::Sub;
-            break;
-        case '*':
-            optype = NodeType::Mul;
-            break;
-        case '/':
-            optype = NodeType::Div;
-            break;
-        default:
-            throw std::runtime_error("Invalid operator: " + token);
-            break;
-    }
-
-    return std::make_shared<Node>(optype);
-}
 
 static std::shared_ptr<Node> expr(const std::vector<std::string>& tokens,
                                   std::vector<std::string>::const_iterator& it);
@@ -65,7 +23,7 @@ static std::shared_ptr<Node> factor(
         return inner_expr;
     }
 
-    auto factor = createNumber(*it);
+    auto factor = Calc::Node::CreateNumber(*it);
     ++it;
     return factor;
 }
@@ -74,17 +32,20 @@ static std::shared_ptr<Node> term(
     const std::vector<std::string>& tokens,
     std::vector<std::string>::const_iterator& it) {
     auto left = factor(tokens, it);
+    if (left == nullptr) {
+        return nullptr;
+    }
 
     while (it != tokens.end()) {
         if ((*it == "*") || (*it == "/")) {
-            auto op = createOperator(*it);
+            auto op_str{*it};
             ++it;
             auto right = term(tokens, it);
+            if (right == nullptr) {
+                return nullptr;
+            }
 
-            op->attachLeft(left);
-            op->attachRight(right);
-
-            return op;
+            return Calc::Node::CreateBinaryOperator(op_str, left, right);
         } else {
             break;
         }
@@ -97,17 +58,20 @@ static std::shared_ptr<Node> expr(
     const std::vector<std::string>& tokens,
     std::vector<std::string>::const_iterator& it) {
     auto left = term(tokens, it);
+    if (left == nullptr) {
+        return nullptr;
+    }
 
     while (it != tokens.end()) {
         if ((*it == "+") || (*it == "-")) {
-            auto op = createOperator(*it);
+            auto op_str{*it};
             ++it;
             auto right = expr(tokens, it);
+            if (right == nullptr) {
+                return nullptr;
+            }
 
-            op->attachLeft(left);
-            op->attachRight(right);
-
-            return op;
+            return Calc::Node::CreateBinaryOperator(op_str, left, right);
         } else {
             break;
         }
@@ -117,6 +81,10 @@ static std::shared_ptr<Node> expr(
 }
 
 std::shared_ptr<Node> Parser::parse(const std::vector<std::string>& tokens) {
+    if (tokens.empty()) {
+        return nullptr;
+    }
+
     std::vector<std::string>::const_iterator it{tokens.begin()};
     return expr(tokens, it);
 }

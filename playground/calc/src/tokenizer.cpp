@@ -6,7 +6,7 @@
 namespace {
 
 static std::vector<char> separators{' ', '\t'};
-static std::vector<std::string> predefined_symbols{"+", "-", "*",
+static std::vector<std::string> defined_symbols{"+", "-", "*",
                                                    "/", "(", ")"};
 
 }  // namespace
@@ -22,8 +22,8 @@ static bool isSeparator(const char c) {
     return false;
 }
 
-static bool isPredefinedSymbol(const std::string& str) {
-    for (auto symbol : predefined_symbols) {
+static bool isDefinedSymbol(const std::string& str) {
+    for (auto symbol : defined_symbols) {
         if (str == symbol) {
             return true;
         }
@@ -43,16 +43,6 @@ static bool isNumberFinished(const char prev_c, const char c) {
     return isNumberCharacter(prev_c) && !isNumberCharacter(c);
 }
 
-/*static bool isNumber(const std::string& str) {
-    auto point = false;
-    for (auto c : str) {
-        if (!isNumberCharacter(c)) {
-            return false;
-        }
-    }
-    return true;
-}*/
-
 static bool isStreamEmpty(std::ostringstream& buf) {
     return buf.tellp() == std::streampos(0);
 }
@@ -68,9 +58,12 @@ static void tokenizeCurrentBuffer(std::vector<std::string>& tokens,
 }
 
 std::vector<std::string> Tokenizer::tokenize(std::string str) {
-    std::ostringstream buf{};
     std::vector<std::string> tokens{};
+    if (str.empty()) {
+        return tokens;
+    }
 
+    std::ostringstream buf{};
     char prev_c = str[0];
     for (auto it = str.begin(); it != str.end(); ++it) {
         auto c = *it;
@@ -84,7 +77,7 @@ std::vector<std::string> Tokenizer::tokenize(std::string str) {
         if (!isStreamEmpty(buf)) {
             auto current_token = buf.str();
             // Tokenize the buffer when it's defined symbol
-            if (isPredefinedSymbol(current_token)) {
+            if (isDefinedSymbol(current_token)) {
                 tokenizeCurrentBuffer(tokens, buf);
                 // Tokenize the buffer when the character type is changed
                 // between number and non-number
