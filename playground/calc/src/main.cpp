@@ -26,8 +26,9 @@ int main() {
         auto tokens = tokenizer.tokenize(input);
         auto expr = parser.parse(tokens);
         if (expr == nullptr) {
-            std::cout << expr->eval() << std::endl;
+            continue;
         }
+        std::cout << expr->eval() << std::endl;
     }
 
     return 0;
