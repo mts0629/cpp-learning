@@ -144,7 +144,7 @@ TEST(NodeTest, EvaluateBinaryOperatorWithoutLhs) {
     auto b = Calc::Node::CreateNumber("2");
 
     ::testing::internal::CaptureStderr();
-    auto node = Calc::Node::CreateBinaryOperator("+", a, b);
+    auto node = Calc::Node::CreateBinaryOperator("*", a, b);
 
     EXPECT_EQ(std::numeric_limits<double>::infinity(), node->eval());
     ASSERT_STREQ("[Error] operand is lacking\n",
@@ -161,4 +161,20 @@ TEST(NodeTest, EvaluateBinaryOperatorWithoutRhs) {
     EXPECT_EQ(std::numeric_limits<double>::infinity(), node->eval());
     ASSERT_STREQ("[Error] operand is lacking\n",
                  ::testing::internal::GetCapturedStderr().c_str());
+}
+
+TEST(NodeTest, EvaluateMinusOne) {
+    auto a = Calc::Node::CreateNumber("1");
+
+    auto node = Calc::Node::CreateUnaryOperator("-", a);
+
+    EXPECT_EQ(-1, node->eval());
+}
+
+TEST(NodeTest, EvaluatePlusOne) {
+    auto a = Calc::Node::CreateNumber("1");
+
+    auto node = Calc::Node::CreateUnaryOperator("+", a);
+
+    EXPECT_EQ(1, node->eval());
 }

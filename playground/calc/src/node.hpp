@@ -21,6 +21,9 @@ public:
          const std::shared_ptr<Node> right)
         : type_(op), value_(0), lhs_(left), rhs_(right) {}
 
+    Node(const NodeType op, const std::shared_ptr<Node> right)
+        : type_(op), value_(0), lhs_(nullptr), rhs_(right) {}
+
     ~Node() {}
 
     NodeType type() { return this->type_; }
@@ -35,6 +38,9 @@ public:
     static std::shared_ptr<Node> CreateBinaryOperator(
         const std::string& token, std::shared_ptr<Node>& left,
         std::shared_ptr<Node>& right);
+
+    static std::shared_ptr<Node> CreateUnaryOperator(
+        const std::string& token, std::shared_ptr<Node>& right);
 
 private:
     NodeType type_;

@@ -11,7 +11,8 @@ std::unordered_map<std::string, Calc::NodeType> operator_table = {
     {"-", Calc::NodeType::Sub},
     {"*", Calc::NodeType::Mul},
     {"/", Calc::NodeType::Div}};
-}
+
+}  // namespace
 
 namespace Calc {
 
@@ -20,31 +21,53 @@ double Node::eval() {
         return this->value_;
     }
 
-    if ((this->lhs_ == nullptr) || (this->rhs_ == nullptr)) {
+    if ((this->lhs_ == nullptr) && (this->rhs_ == nullptr)) {
         std::cerr << "[Error] operand is lacking\n";
         return std::numeric_limits<double>::infinity();
     }
 
-    auto lhs = this->lhs_->eval();
-    auto rhs = this->rhs_->eval();
-
-    switch (this->type_) {
-        case NodeType::Add:
-            this->value_ = lhs + rhs;
-            break;
-        case NodeType::Sub:
-            this->value_ = lhs - rhs;
-            break;
-        case NodeType::Mul:
-            this->value_ = lhs * rhs;
-            break;
-        case NodeType::Div:
-            this->value_ = lhs / rhs;
-            break;
-        default:
-            std::cerr << "[Error] invalid operator\n";
+    if (this->lhs_ == nullptr) {
+        // Unary operator
+        auto rhs = this->rhs_->eval();
+        switch (this->type_) {
+            case NodeType::Add:
+                this->value_ = rhs;
+                break;
+            case NodeType::Sub:
+                this->value_ = -rhs;
+                break;
+            default:
+                std::cerr << "[Error] operand is lacking\n";
+                return std::numeric_limits<double>::infinity();
+                break;
+        }
+    } else {
+        // Binary operator
+        if (this->rhs_ == nullptr) {
+            std::cerr << "[Error] operand is lacking\n";
             return std::numeric_limits<double>::infinity();
-            break;
+        }
+
+        auto lhs = this->lhs_->eval();
+        auto rhs = this->rhs_->eval();
+        switch (this->type_) {
+            case NodeType::Add:
+                this->value_ = lhs + rhs;
+                break;
+            case NodeType::Sub:
+                this->value_ = lhs - rhs;
+                break;
+            case NodeType::Mul:
+                this->value_ = lhs * rhs;
+                break;
+            case NodeType::Div:
+                this->value_ = lhs / rhs;
+                break;
+            default:
+                std::cerr << "[Error] invalid operator\n";
+                return std::numeric_limits<double>::infinity();
+                break;
+        }
     }
 
     return this->value_;
@@ -80,6 +103,16 @@ std::shared_ptr<Node> Node::CreateBinaryOperator(const std::string& token,
     }
 
     return std::make_shared<Node>(operator_table[token], left, right);
+}
+
+std::shared_ptr<Node> Node::CreateUnaryOperator(const std::string& token,
+                                                std::shared_ptr<Node>& right) {
+    if ((token != "+") && (token != "-")) {
+        std::cerr << "[Error] invalid token: \"" + token + "\"\n";
+        return nullptr;
+    }
+
+    return std::make_shared<Node>(operator_table[token], right);
 }
 
 }  // namespace Calc

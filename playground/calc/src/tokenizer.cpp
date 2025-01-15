@@ -6,8 +6,7 @@
 namespace {
 
 static std::vector<char> separators{' ', '\t'};
-static std::vector<std::string> defined_symbols{"+", "-", "*",
-                                                   "/", "(", ")"};
+static std::vector<std::string> defined_symbols{"+", "-", "*", "/", "(", ")"};
 
 }  // namespace
 
