@@ -21,6 +21,13 @@ static std::shared_ptr<Node> factor(
         ++it;
 
         return inner_expr;
+    } else if ((*it == "+") || (*it == "-")) {
+        auto op_str{*it};
+        ++it;
+        auto right = factor(tokens, it);
+        auto op = Calc::Node::CreateUnaryOperator(op_str, right);
+
+        return op;
     }
 
     auto factor = Calc::Node::CreateNumber(*it);

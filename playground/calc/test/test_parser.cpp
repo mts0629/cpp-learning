@@ -134,6 +134,34 @@ TEST_F(ParserTest, EvaluateOnlyParenthesesTerm) {
     EXPECT_EQ(3, expr->eval());
 }
 
+TEST_F(ParserTest, EvaluateMinusOnePlusTwo) {
+    auto tokens = createTokens("-", "1", "+", "2");
+    auto expr = parser_->parse(tokens);
+
+    EXPECT_EQ(1, expr->eval());
+}
+
+TEST_F(ParserTest, EvaluatePlusOnePlusTwo) {
+    auto tokens = createTokens("+", "1", "+", "2");
+    auto expr = parser_->parse(tokens);
+
+    EXPECT_EQ(3, expr->eval());
+}
+
+TEST_F(ParserTest, EvaluateMinusForParenthesesTerm) {
+    auto tokens = createTokens("-", "(", "1", "+", "2", ")");
+    auto expr = parser_->parse(tokens);
+
+    EXPECT_EQ(-3, expr->eval());
+}
+
+TEST_F(ParserTest, EvaluateTwoTimesMinusOne) {
+    auto tokens = createTokens("2", "*", "-", "1");
+    auto expr = parser_->parse(tokens);
+
+    EXPECT_EQ(-2, expr->eval());
+}
+
 TEST_F(ParserTest, ReturnNullptrWhenLhsIsInvalidToken) {
     auto tokens = createTokens("???", "+", "1");
 
