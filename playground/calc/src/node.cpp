@@ -21,6 +21,16 @@ double Node::eval() {
         return this->value_;
     }
 
+    if (this->type_ == NodeType::Variable) {
+        if (this->rhs_ == nullptr) {
+            std::cerr << "[Error] variable \"" << this->symbol_
+                      << "\" is unassigned\n";
+            return std::numeric_limits<double>::infinity();
+        }
+
+        return this->rhs_->eval();
+    }
+
     if ((this->lhs_ == nullptr) && (this->rhs_ == nullptr)) {
         std::cerr << "[Error] operand is lacking\n";
         return std::numeric_limits<double>::infinity();
@@ -88,6 +98,10 @@ std::shared_ptr<Node> Node::CreateNumber(const std::string& token) {
     }
 
     return std::make_shared<Node>(number);
+}
+
+std::shared_ptr<Node> Node::CreateVariable(const std::string& token) {
+    return std::make_shared<Node>(token);
 }
 
 static bool operator_is_invalid(const std::string& token) {

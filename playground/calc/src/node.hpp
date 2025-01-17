@@ -7,22 +7,30 @@
 
 namespace Calc {
 
-enum class NodeType { Invalid, Number, Add, Sub, Mul, Div };
+enum class NodeType { Invalid, Number, Variable, Add, Sub, Mul, Div };
 
 class Node : public std::enable_shared_from_this<Node> {
 public:
+    Node(const std::string& token)
+        : type_(NodeType::Variable),
+          value_(0),
+          symbol_(token),
+          lhs_(nullptr),
+          rhs_(nullptr) {}
+
     Node(const double value)
         : type_(NodeType::Number),
           value_(value),
+          symbol_(""),
           lhs_(nullptr),
           rhs_(nullptr) {}
 
     Node(const NodeType op, const std::shared_ptr<Node> left,
          const std::shared_ptr<Node> right)
-        : type_(op), value_(0), lhs_(left), rhs_(right) {}
+        : type_(op), value_(0), symbol_(""), lhs_(left), rhs_(right) {}
 
     Node(const NodeType op, const std::shared_ptr<Node> right)
-        : type_(op), value_(0), lhs_(nullptr), rhs_(right) {}
+        : type_(op), value_(0), symbol_(""), lhs_(nullptr), rhs_(right) {}
 
     ~Node() {}
 
@@ -35,6 +43,8 @@ public:
 
     static std::shared_ptr<Node> CreateNumber(const std::string& token);
 
+    static std::shared_ptr<Node> CreateVariable(const std::string& token);
+
     static std::shared_ptr<Node> CreateBinaryOperator(
         const std::string& token, std::shared_ptr<Node>& left,
         std::shared_ptr<Node>& right);
@@ -45,6 +55,7 @@ public:
 private:
     NodeType type_;
     double value_;
+    std::string symbol_;
 
     std::shared_ptr<Node> lhs_;
     std::shared_ptr<Node> rhs_;

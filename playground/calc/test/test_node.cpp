@@ -178,3 +178,14 @@ TEST(NodeTest, EvaluatePlusOne) {
 
     EXPECT_EQ(1, node->eval());
 }
+
+TEST(NodeTest, CreateVariable) {
+    auto x = Calc::Node::CreateVariable("x");
+
+    EXPECT_EQ(Calc::NodeType::Variable, x->type());
+
+    ::testing::internal::CaptureStderr();
+    EXPECT_EQ(std::numeric_limits<double>::infinity(), x->eval());
+    ASSERT_STREQ("[Error] variable \"x\" is unassigned\n",
+                 ::testing::internal::GetCapturedStderr().c_str());
+}
