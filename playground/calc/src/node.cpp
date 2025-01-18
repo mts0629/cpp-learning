@@ -16,6 +16,8 @@ std::unordered_map<std::string, Calc::NodeType> operator_table = {
 
 namespace Calc {
 
+std::unordered_map<std::string, std::shared_ptr<Node>> Node::variables_{};
+
 void Node::assign(std::shared_ptr<Node>& node) {
     if (this->type_ != NodeType::Variable) {
         std::cerr << "[Error] only variables can be assigned\n";
@@ -156,6 +158,19 @@ std::shared_ptr<Node> Node::CreateUnaryOperator(const std::string& token,
     }
 
     return std::make_shared<Node>(operator_table[token], right);
+}
+
+void Node::StoreVariable(const std::shared_ptr<Node>& var) {
+    Node::variables_[var->symbol()] = var;
+}
+
+std::shared_ptr<Node> Node::CallVariable(const std::string& symbol) {
+    auto var = Node::variables_.find(symbol);
+    if (var == Node::variables_.end()) {
+        return nullptr;
+    }
+
+    return var->second;
 }
 
 }  // namespace Calc

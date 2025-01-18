@@ -1,7 +1,6 @@
 #include "parser.hpp"
 
 #include <sstream>
-#include <unordered_map>
 
 namespace Calc {
 
@@ -46,11 +45,15 @@ static std::shared_ptr<Node> factor(
 
     std::shared_ptr<Node> factor{nullptr};
     if (isValidAsVariable(*it)) {
-        factor = Calc::Node::CreateVariable(*it);
+        factor = Calc::Node::CallVariable(*it);
+        if (!factor) {
+            factor = Calc::Node::CreateVariable(*it);
+        }
     } else {
         factor = Calc::Node::CreateNumber(*it);
     }
     ++it;
+
     return factor;
 }
 
@@ -92,11 +95,13 @@ static std::shared_ptr<Node> expr(
         if (*it == "=") {
             ++it;
             auto right = expr(tokens, it);
-            // if (right == nullptr) {
-            //     return nullptr;
-            // }
+            if (right == nullptr) {
+                return nullptr;
+            }
 
             left->assign(right);
+            Calc::Node::StoreVariable(left);
+
             return left;
         } else if ((*it == "+") || (*it == "-")) {
             auto op_str{*it};

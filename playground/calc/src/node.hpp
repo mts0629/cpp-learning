@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace Calc {
@@ -35,6 +36,7 @@ public:
     ~Node() {}
 
     NodeType type() { return this->type_; }
+    const std::string& symbol() { return this->symbol_; }
 
     const std::shared_ptr<Node>& left() { return this->lhs_; }
     const std::shared_ptr<Node>& right() { return this->rhs_; }
@@ -54,6 +56,9 @@ public:
     static std::shared_ptr<Node> CreateUnaryOperator(
         const std::string& token, std::shared_ptr<Node>& right);
 
+    static void StoreVariable(const std::shared_ptr<Node>& var);
+    static std::shared_ptr<Node> CallVariable(const std::string& symbol);
+
 private:
     NodeType type_;
     double value_;
@@ -61,6 +66,8 @@ private:
 
     std::shared_ptr<Node> lhs_;
     std::shared_ptr<Node> rhs_;
+
+    static std::unordered_map<std::string, std::shared_ptr<Node>> variables_;
 };
 
 }  // namespace Calc
