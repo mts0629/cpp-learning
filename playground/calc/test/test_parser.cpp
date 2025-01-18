@@ -162,6 +162,20 @@ TEST_F(ParserTest, EvaluateTwoTimesMinusOne) {
     EXPECT_EQ(-2, expr->eval());
 }
 
+TEST_F(ParserTest, EvaluateAssignOneToX) {
+    auto tokens = createTokens("x", "=", "1");
+    auto expr = parser_->parse(tokens);
+
+    EXPECT_EQ(1, expr->eval());
+}
+
+TEST_F(ParserTest, EvaluateAssignOnePlusTwoToX) {
+    auto tokens = createTokens("x", "=", "1", "+", "2");
+    auto expr = parser_->parse(tokens);
+
+    EXPECT_EQ(3, expr->eval());
+}
+
 TEST_F(ParserTest, ReturnNullptrWhenLhsIsInvalidToken) {
     auto tokens = createTokens("???", "+", "1");
 

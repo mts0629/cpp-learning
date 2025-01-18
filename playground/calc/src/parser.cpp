@@ -8,6 +8,20 @@ namespace Calc {
 static std::shared_ptr<Node> expr(const std::vector<std::string>& tokens,
                                   std::vector<std::string>::const_iterator& it);
 
+static bool isValidAsVariable(const std::string& token) {
+    if (!isalpha(token[0])) {
+        return false;
+    }
+
+    for (auto i = 1U; i < token.size(); i++) {
+        if (!isalnum(token[i]) && (token[i] != '_')) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 static std::shared_ptr<Node> factor(
     const std::vector<std::string>& tokens,
     std::vector<std::string>::const_iterator& it) {
@@ -30,7 +44,12 @@ static std::shared_ptr<Node> factor(
         return op;
     }
 
-    auto factor = Calc::Node::CreateNumber(*it);
+    std::shared_ptr<Node> factor{nullptr};
+    if (isValidAsVariable(*it)) {
+        factor = Calc::Node::CreateVariable(*it);
+    } else {
+        factor = Calc::Node::CreateNumber(*it);
+    }
     ++it;
     return factor;
 }
@@ -70,7 +89,16 @@ static std::shared_ptr<Node> expr(
     }
 
     while (it != tokens.end()) {
-        if ((*it == "+") || (*it == "-")) {
+        if (*it == "=") {
+            ++it;
+            auto right = expr(tokens, it);
+            // if (right == nullptr) {
+            //     return nullptr;
+            // }
+
+            left->assign(right);
+            return left;
+        } else if ((*it == "+") || (*it == "-")) {
             auto op_str{*it};
             ++it;
             auto right = expr(tokens, it);

@@ -39,6 +39,8 @@ public:
     const std::shared_ptr<Node>& left() { return this->lhs_; }
     const std::shared_ptr<Node>& right() { return this->rhs_; }
 
+    void assign(std::shared_ptr<Node>& node);
+
     double eval();
 
     static std::shared_ptr<Node> CreateNumber(const std::string& token);

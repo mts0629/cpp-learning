@@ -16,6 +16,15 @@ std::unordered_map<std::string, Calc::NodeType> operator_table = {
 
 namespace Calc {
 
+void Node::assign(std::shared_ptr<Node>& node) {
+    if (this->type_ != NodeType::Variable) {
+        std::cerr << "[Error] only variables can be assigned\n";
+        return;
+    }
+
+    this->rhs_ = node;
+}
+
 double Node::eval() {
     if (this->type_ == NodeType::Number) {
         return this->value_;
@@ -100,18 +109,38 @@ std::shared_ptr<Node> Node::CreateNumber(const std::string& token) {
     return std::make_shared<Node>(number);
 }
 
+static bool isValidAsVariable(const std::string& token) {
+    if (!isalpha(token[0])) {
+        return false;
+    }
+
+    for (auto i = 1U; i < token.size(); i++) {
+        if (!isalnum(token[i]) && (token[i] != '_')) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 std::shared_ptr<Node> Node::CreateVariable(const std::string& token) {
+    if (!isValidAsVariable(token)) {
+        std::cerr << "[Error] variable \"" + token +
+                         "\" is invalid (format: `[a-zA-Z]+[a-zA-Z0-9]*`)\n";
+        return nullptr;
+    }
+
     return std::make_shared<Node>(token);
 }
 
-static bool operator_is_invalid(const std::string& token) {
-    return operator_table.find(token) == operator_table.end();
+static bool isValidAsOperator(const std::string& token) {
+    return operator_table.find(token) != operator_table.end();
 }
 
 std::shared_ptr<Node> Node::CreateBinaryOperator(const std::string& token,
                                                  std::shared_ptr<Node>& left,
                                                  std::shared_ptr<Node>& right) {
-    if (operator_is_invalid(token)) {
+    if (!isValidAsOperator(token)) {
         std::cerr << "[Error] invalid token: \"" + token + "\"\n";
         return nullptr;
     }

@@ -6,7 +6,8 @@
 namespace {
 
 static std::vector<char> separators{' ', '\t'};
-static std::vector<std::string> defined_symbols{"+", "-", "*", "/", "(", ")"};
+static std::vector<std::string> defined_symbols{"+", "-", "*", "/",
+                                                "(", ")", "="};
 
 }  // namespace
 
@@ -82,6 +83,8 @@ std::vector<std::string> Tokenizer::tokenize(std::string str) {
                 // between number and non-number
             } else if (isNumberStart(prev_c, c) ||
                        isNumberFinished(prev_c, c)) {
+                tokenizeCurrentBuffer(tokens, buf);
+            } else if (c == '=') {
                 tokenizeCurrentBuffer(tokens, buf);
             }
         }

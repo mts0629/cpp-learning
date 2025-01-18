@@ -180,12 +180,74 @@ TEST(NodeTest, EvaluatePlusOne) {
 }
 
 TEST(NodeTest, CreateVariable) {
-    auto x = Calc::Node::CreateVariable("x");
+    std::vector<std::string> tokens = {"x", "var", "var1", "var_1"};
 
-    EXPECT_EQ(Calc::NodeType::Variable, x->type());
+    for (auto token : tokens) {
+        auto var = Calc::Node::CreateVariable(token);
 
-    ::testing::internal::CaptureStderr();
-    EXPECT_EQ(std::numeric_limits<double>::infinity(), x->eval());
-    ASSERT_STREQ("[Error] variable \"x\" is unassigned\n",
-                 ::testing::internal::GetCapturedStderr().c_str());
+        EXPECT_EQ(Calc::NodeType::Variable, var->type());
+
+        ::testing::internal::CaptureStderr();
+        EXPECT_EQ(std::numeric_limits<double>::infinity(), var->eval());
+        auto error_message =
+            "[Error] variable \"" + token + "\" is unassigned\n";
+        ASSERT_STREQ(error_message.c_str(),
+                     ::testing::internal::GetCapturedStderr().c_str());
+    }
+}
+
+TEST(NodeTest, CannotCreateVariableInInvalidFormat) {
+    std::vector<std::string> tokens = {"1", "1var", "+", "var+", "_var"};
+
+    for (auto token : tokens) {
+        ::testing::internal::CaptureStderr();
+        auto var = Calc::Node::CreateVariable(token);
+
+        EXPECT_EQ(nullptr, var);
+        auto error_message =
+            "[Error] variable \"" + token +
+            "\" is invalid (format: `[a-zA-Z]+[a-zA-Z0-9]*`)\n";
+        ASSERT_STREQ(error_message.c_str(),
+                     ::testing::internal::GetCapturedStderr().c_str());
+    }
+}
+
+TEST(NodeTest, AssignOneToX) {
+    auto var = Calc::Node::CreateVariable("x");
+    auto one = Calc::Node::CreateNumber("1");
+
+    var->assign(one);
+
+    EXPECT_EQ(1, var->eval());
+}
+
+TEST(NodeTest, AssignOnePlusTwo) {
+    auto var = Calc::Node::CreateVariable("x");
+
+    auto one = Calc::Node::CreateNumber("1");
+    auto two = Calc::Node::CreateNumber("2");
+    auto op = Calc::Node::CreateBinaryOperator("+", one, two);
+
+    var->assign(op);
+
+    EXPECT_EQ(3, var->eval());
+}
+
+TEST(NodeTest, CannotAssignToNonVariables) {
+    auto a = Calc::Node::CreateNumber("-1");
+    auto b = Calc::Node::CreateNumber("3");
+    std::vector<std::shared_ptr<Calc::Node>> nodes = {
+        Calc::Node::CreateNumber("2"),
+        Calc::Node::CreateBinaryOperator("+", a, b)};
+
+    auto one = Calc::Node::CreateNumber("1");
+
+    for (auto node : nodes) {
+        ::testing::internal::CaptureStderr();
+        node->assign(one);
+
+        EXPECT_EQ(2, node->eval());
+        ASSERT_STREQ("[Error] only variables can be assigned\n",
+                     ::testing::internal::GetCapturedStderr().c_str());
+    }
 }
