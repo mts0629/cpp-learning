@@ -3,17 +3,11 @@
 #include <iostream>
 #include <sstream>
 
-namespace {
-
-static std::vector<char> separators{' ', '\t'};
-static std::vector<std::string> defined_symbols{"+", "-", "*", "/",
-                                                "(", ")", "="};
-
-}  // namespace
-
 namespace Calc {
 
 static bool isSeparator(const char c) {
+    static std::vector<char> separators{' ', '\t'};
+
     for (auto separator : separators) {
         if (c == separator) {
             return true;
@@ -23,6 +17,9 @@ static bool isSeparator(const char c) {
 }
 
 static bool isDefinedSymbol(const std::string& str) {
+    static std::vector<std::string> defined_symbols{"+", "-", "*", "/",
+                                                    "(", ")", "="};
+
     for (auto symbol : defined_symbols) {
         if (str == symbol) {
             return true;
@@ -32,15 +29,39 @@ static bool isDefinedSymbol(const std::string& str) {
 }
 
 static bool isNumberCharacter(const char c) {
-    return (isdigit(c) || c == '.') ? true : false;
+    return (isdigit(c) || (c == '.')) ? true : false;
 }
 
-static bool isNumberStart(const char prev_c, const char c) {
-    return !isNumberCharacter(prev_c) && isNumberCharacter(c);
+static bool isIdentifierCharacter(const char c) {
+    return (isalnum(c) || (c == '_')) ? true : false;
 }
 
-static bool isNumberFinished(const char prev_c, const char c) {
-    return isNumberCharacter(prev_c) && !isNumberCharacter(c);
+enum class CharType { Number, Identifier, Separators, Others };
+
+static CharType getCurrentCharType(const CharType state, const char next) {
+    if (isSeparator(next)) {
+        return CharType::Separators;
+    }
+
+    if (state == CharType::Number) {
+        if (isNumberCharacter(next)) {
+            return state;
+        } else if (isalpha(next)) {
+            return CharType::Identifier;
+        }
+    } else if (state == CharType::Identifier) {
+        if (isIdentifierCharacter(next)) {
+            return state;
+        }
+    } else {  // CharType::Others
+        if (isNumberCharacter(next)) {
+            return CharType::Number;
+        } else if (isalpha(next)) {
+            return CharType::Identifier;
+        }
+    }
+
+    return CharType::Others;
 }
 
 static bool isStreamEmpty(std::ostringstream& buf) {
@@ -64,34 +85,33 @@ std::vector<std::string> Tokenizer::tokenize(std::string str) {
     }
 
     std::ostringstream buf{};
-    char prev_c = str[0];
+    CharType prev_char_type = CharType::Others;
     for (auto it = str.begin(); it != str.end(); ++it) {
-        auto c = *it;
+        auto char_type = getCurrentCharType(prev_char_type, *it);
 
         // Tokenize the buffer when a separator is input
-        if (isSeparator(c)) {
+        if (char_type == CharType::Separators) {
             tokenizeCurrentBuffer(tokens, buf);
+            prev_char_type = char_type;
             continue;
         }
 
         if (!isStreamEmpty(buf)) {
-            auto current_token = buf.str();
             // Tokenize the buffer when it's defined symbol
-            if (isDefinedSymbol(current_token)) {
+            if (isDefinedSymbol(buf.str())) {
                 tokenizeCurrentBuffer(tokens, buf);
+            } else {
                 // Tokenize the buffer when the character type is changed
-                // between number and non-number
-            } else if (isNumberStart(prev_c, c) ||
-                       isNumberFinished(prev_c, c)) {
-                tokenizeCurrentBuffer(tokens, buf);
-            } else if (c == '=') {
-                tokenizeCurrentBuffer(tokens, buf);
+                if (char_type != prev_char_type) {
+                    tokenizeCurrentBuffer(tokens, buf);
+                }
             }
         }
 
+        prev_char_type = char_type;
+
         // Store the next character
-        buf << c;
-        prev_c = c;
+        buf << *it;
     }
 
     // Flush the last token

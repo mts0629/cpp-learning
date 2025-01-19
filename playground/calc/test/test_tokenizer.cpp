@@ -66,6 +66,11 @@ TEST_F(TokenizerTest, TokenizeAssignment) {
               tokenizer_->tokenize("x=10"));
 }
 
+TEST_F(TokenizerTest, TokenizeVariableAndOperator) {
+    EXPECT_EQ((std::vector<std::string>{"x", "+", "10"}),
+              tokenizer_->tokenize("x+10"));
+}
+
 TEST_F(TokenizerTest, ReturnEmptyVectorWhenEmptyStringIsInput) {
     std::vector<std::string> empty{};
     EXPECT_EQ(empty, tokenizer_->tokenize(""));
