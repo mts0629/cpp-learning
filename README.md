@@ -8,12 +8,12 @@ Study of C++
 
 ## Tools and dependencies
 
-- g++
-- gdb
-- GNU Make
-- CMake
-- [GoogleTest](https://github.com/google/googletest/tree/main) v1.8.1
-- clang-format
+- g++ 7.5.0
+- GNU gdb 8.1.1
+- GNU Make 4.1
+- CMake 3.25.2
+- [GoogleTest](https://github.com/google/googletest/tree/main) 1.8.1
+- clang-format 13.0.1
 
 ## License
 
@@ -36,3 +36,5 @@ and following changes are included:
 - Modification for the project structure
 
 Copyright for non-modified parts belongs to the original author.
+
+The licenses for third-party libraries can be found in the `licenses/` directory.
